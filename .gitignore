@@ -1,0 +1,4 @@
+*.hdf5
+.env/
+.vscode/
+.ipynb_checkpoints/
