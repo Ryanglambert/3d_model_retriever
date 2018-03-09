@@ -29,8 +29,10 @@ mccabe==0.6.1
 mistune==0.8.3
 nbconvert==5.3.1
 nbformat==4.4.0
+nine==1.0.0
 notebook==5.4.0
 numpy==1.14.1
+numpy-stl==2.3.2
 pandas==0.22.0
 pandocfilters==1.4.2
 parso==0.1.1
@@ -43,6 +45,7 @@ Pygments==2.2.0
 pylint==1.8.2
 pyparsing==2.2.0
 python-dateutil==2.6.1
+python-utils==2.3.0
 pytz==2018.3
 PyYAML==3.12
 pyzmq==17.0.0
