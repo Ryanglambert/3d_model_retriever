@@ -6,6 +6,11 @@ http://modelnet.cs.princeton.edu/ModelNet40.zip
 - *.off polygon to *.binvox voxel tool --->>> 
     - https://www.patrickmin.com/binvox/
     - cmdline tool that can be run against *.off files and returns a *.binvox file which can be interpreted by the code below
+    - The binvox_converter.py file does the work, it just needs to have the binvox executable in the same directory
+    - MACOSX install:
+        - `wget http://www.patrickmin.com/binvox/download.php?id=6`
+    - Linux install:
+        - `wget http://www.patrickmin.com/binvox/download.php?id=4`
 - *.binvox reader --->>>
     - https://github.com/Ryanglambert/binvox-rw-py/blob/public/binvox_rw.py
 
