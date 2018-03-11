@@ -3,19 +3,20 @@ import os
 import subprocess
 import sys
 
+if 'linux' in sys.platform:
+    CMD = "xvfb-run -s '-screen 0 640x480x24' ./binvox -cb -pb -d {dim} {path}"
+elif 'darwin' in sys.platform:
+    CMD = './binvox -cb -d {dim} {path}'
+else:
+    raise SystemError('System is not of type darwin or linux, what kind of system are you using?')
+
+
 
 def convert_off_to_binvox(path, dim=30):
     "Converts *.off file to *.binvox"
     assert ".off" in path, 'Wrong file type!'
 
-    if 'linux' in sys.platform:
-        cmd = "xvfb-run -s '-screen 0 640x480x24' ./binvox -cb -pb -d {dim} {path}".format(dim=dim, path=path)
-    elif 'darwin' in sys.platform:
-        cmd = './binvox -cb -d {dim} {path}'.format(dim=dim, path=path)
-    else:
-        raise SystemError('System is not of type darwin or linux, what kind of system are you using?')
-
-    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    process = subprocess.Popen(CMD.format(dim=dim, path=path).split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     if error:
         print("Output from Binvox: \n{}".format(output))
