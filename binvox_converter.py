@@ -4,9 +4,10 @@ import subprocess
 import sys
 
 if 'linux' in sys.platform:
-    CMD = "xvfb-run -s '-screen 0 640x480x24' ./binvox -cb -pb -d {dim} {path}"
+    CMD = ("xvfb-run -s '-screen 0 640x480x24'" 
+           "./binvox -cb -pb -e -c -d {dim} {path}")
 elif 'darwin' in sys.platform:
-    CMD = './binvox -cb -d {dim} {path}'
+    CMD = './binvox -cb -e -c -d {dim} {path}'
 else:
     raise SystemError('System is not of type darwin or linux, what kind of system are you using?')
 
