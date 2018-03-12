@@ -1,4 +1,19 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+import binvox_rw_py as binvox
+
+
+def plot_vox(path):
+    with open(path, 'rb') as f:
+        model = binvox.read_as_3d_array(f)
+
+    # model.data is a 3D boolean array in this case. Probably could also be float array.
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.view_init(45, 135)
+    ax.voxels(model.data, edgecolor='k')
+    plt.show()
 
 
 def plot_learning_curves(history, epochs=200, y_min=0):

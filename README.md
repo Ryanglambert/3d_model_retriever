@@ -8,13 +8,16 @@
     - cmdline tool that can be run against *.off files and returns a *.binvox file which can be interpreted by the code below
     - The binvox_converter.py file does the work, it just needs to have the binvox executable in the same directory
     - MACOSX install:
-        - `wget http://www.patrickmin.com/binvox/download.php?id=6`
+        - `download http://www.patrickmin.com/binvox/download.php?id=6`
+        - `chmod 755 binvox`
     - Linux install:
-        - `wget http://www.patrickmin.com/binvox/download.php?id=4`
+        - `download http://www.patrickmin.com/binvox/download.php?id=4`
+        - `chmod 755 binvox`
 - *.binvox reader --->>>
     - https://github.com/Ryanglambert/binvox-rw-py/blob/public/binvox_rw.py
 
-- Resolution
+
+- Voxel Resolution
     - http://vision.princeton.edu/projects/2014/3DShapeNets/paper.pdf
 "To study 3D shape representation, we propose to represent
 a geometric 3D shape as a probability distribution of
@@ -23,5 +26,5 @@ as a binary tensor: 1 indicates the voxel is inside the
 mesh surface, and 0 indicates the voxel is outside the mesh
 (i.e., it is empty space). The grid size in our experiments is
 30 × 30 × 30."
-    - `./binvox -cb -d 30 sample.off`
-    - this takes a couple of seconds
+    - `./binvox -cb -e -c -d 30 sample.off`
+        - -e  is important, with a lot of troubleshooting it was shown that not using this led to inconsistent voxelization :headache:
