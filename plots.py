@@ -4,16 +4,20 @@ from mpl_toolkits.mplot3d import Axes3D
 import binvox_rw_py as binvox
 
 
-def plot_vox(path):
-    with open(path, 'rb') as f:
-        model = binvox.read_as_3d_array(f)
-
-    # model.data is a 3D boolean array in this case. Probably could also be float array.
+def plot_vox(mat):
     fig = plt.figure()
     ax = Axes3D(fig)
     ax.view_init(45, 135)
-    ax.voxels(model.data, edgecolor='k')
+    ax.voxels(mat, edgecolor='k')
     plt.show()
+
+
+def plot_vox_file(path):
+    with open(path, 'rb') as f:
+        model = binvox.read_as_3d_array(f)
+    # model.data is a 3D boolean array in this case. Probably could also be float array.
+    plot_vox(model.data)
+
 
 
 def plot_learning_curves(history, epochs=200, y_min=0):
