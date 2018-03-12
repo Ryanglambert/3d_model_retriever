@@ -36,7 +36,6 @@ def list_file_paths(path):
             if file_path not in ignore_files:
                 abs_path = os.path.abspath(os.path.join(root, file_path))
                 yield abs_path
-                print(abs_path)
 
 
 def remove_all(path):
