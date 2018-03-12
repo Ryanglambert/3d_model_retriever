@@ -12,10 +12,13 @@ else:
     raise SystemError('System is not of type darwin or linux, what kind of system are you using?')
 
 
-
 def convert_off_to_binvox(path, dim=30):
     "Converts *.off file to *.binvox"
-    assert ".off" in path, 'Wrong file type!'
+    if ".binvox" in path:
+        os.remove(path)
+    if ".off" not in path:
+        print("{} is not an '*.off' file... skipping".format(path))
+        return
 
     process = subprocess.Popen(CMD.format(dim=dim, path=path).split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
@@ -34,13 +37,24 @@ def list_file_paths(path):
                 print(abs_path)
 
 
+def remove_all(path):
+    paths = list_file_paths(path)
+    for file_path in paths:
+        if ".binvox" in file_path:
+            print("removing...{}".format(file_path))
+            os.remove(file_path)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Process *.off files into *.binvox')
     parser.add_argument(dest="root_path",
                         help="give the root_path for the *.off files you want to convert to *.binvox")
     parser.add_argument('--dimensions', default=30)
+    parser.add_argument('--remove-all-binvox', dest='remove_all', action='store_true')
     args = parser.parse_args()
 
+    if args.remove_all:
+        remove_all(args.root_path)
     paths_generator = list_file_paths(args.root_path)
     for path in paths_generator:
         convert_off_to_binvox(path, dim=args.dimensions)
