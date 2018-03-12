@@ -9,3 +9,4 @@ ModelNet40/
 ModelNet40.zip.1
 ModelNet40.zip
 binvox
+*.log
