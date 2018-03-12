@@ -51,7 +51,7 @@ def main():
     parser.add_argument(dest="root_path",
                         help="give the root_path for the *.off files you want to convert to *.binvox")
     parser.add_argument('--dimensions', default=30)
-    parser.add_argument('--remove-all-binvox', dest='remove_all', action='store_true')
+    parser.add_argument('--remove-all-dupes', dest='remove_all', action='store_true')
     args = parser.parse_args()
 
     assert 'ModelNet' in args.root_path, ("ONLY RUN THIS IN THE ModelNet folder!!!")
