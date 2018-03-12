@@ -14,8 +14,6 @@ else:
 
 def convert_off_to_binvox(path, dim=30):
     "Converts *.off file to *.binvox"
-    if ".binvox" in path:
-        os.remove(path)
     if ".off" not in path:
         print("{} is not an '*.off' file... skipping".format(path))
         return
@@ -31,6 +29,10 @@ def list_file_paths(path):
     ignore_files = ['.DS_Store']
     for root, _, files in os.walk(path):
         for file_path in files:
+            # this is throwing a funky error but the files are still showing up will come back to this when it's not crunchtime
+            # /Users/ryan/repos/deep_learning_mabs/ModelNet10/sofa/train/sofa_0364.off
+            # wc: wc: open: No such file or directory
+            # wc: -l: open: No such file or directory
             if file_path not in ignore_files:
                 abs_path = os.path.abspath(os.path.join(root, file_path))
                 yield abs_path
@@ -53,8 +55,12 @@ def main():
     parser.add_argument('--remove-all-binvox', dest='remove_all', action='store_true')
     args = parser.parse_args()
 
+    assert 'ModelNet' in args.root_path, ("ONLY RUN THIS IN THE ModelNet folder!!!")
+    # Essentially to overwrite what's already there
     if args.remove_all:
         remove_all(args.root_path)
+
+    # actually do the conversion from *.off to *.binvox
     paths_generator = list_file_paths(args.root_path)
     for path in paths_generator:
         convert_off_to_binvox(path, dim=args.dimensions)
