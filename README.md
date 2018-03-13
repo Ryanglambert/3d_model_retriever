@@ -18,13 +18,13 @@ In the root of the project
 - MACOSX install:
 
 ```
-    wget http://www.patrickmin.com/binvox/mac/binvox\?rnd\=1520896803665325
+    wget http://www.patrickmin.com/binvox/mac/binvox\?rnd\=1520896803665325 -O binvox
     chmod 755 binvox
 ```
 - Linux install:
 
 ```
-    wget http://www.patrickmin.com/binvox/linux64/binvox?rnd=1520896952313989
+    wget http://www.patrickmin.com/binvox/linux64/binvox?rnd=1520896952313989 -O binvox
     chmod 755 binvox
 ```
     
