@@ -3,10 +3,10 @@
 **Download the data**
 
 ```
-cd 3d_model_retrieval/
-wget http://vision.princeton.edu/projects/2014/3DShapeNets/ModelNet10.zip -O .
+cd 3d_model_retriever/
+wget http://vision.princeton.edu/projects/2014/3DShapeNets/ModelNet10.zip
 unzip ModelNet10.zip
-wget http://modelnet.cs.princeton.edu/ModelNet40.zip -O .
+wget http://modelnet.cs.princeton.edu/ModelNet40.zip
 unzip ModelNet40.zip
 ```
 
@@ -31,7 +31,7 @@ In the root of the project
 **Make env**
 
 ```
-cd 3d_model_retrieval
+cd 3d_model_retriever
 python3 -m venv .env
 source .env/bin/activate
 pip install -r mac_requirements.txt
