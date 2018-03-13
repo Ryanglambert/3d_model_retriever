@@ -34,6 +34,7 @@ In the root of the project
 cd 3d_model_retrieval
 python3 -m venv .env
 source .env/bin/activate
+pip install -r mac_requirements.txt
 ```
     
 **Convert all &ast;.off files to &ast;.binvox**

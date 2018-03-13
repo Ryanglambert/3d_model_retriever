@@ -32,7 +32,6 @@ nbformat==4.4.0
 nine==1.0.0
 notebook==5.4.0
 numpy==1.14.1
-numpy-stl==2.3.2
 pandas==0.22.0
 pandocfilters==1.4.2
 parso==0.1.1
