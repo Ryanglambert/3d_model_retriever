@@ -38,7 +38,7 @@ def list_file_paths(path):
                 yield abs_path
 
 
-def remove_all(path):
+def _remove_all(path):
     paths = list_file_paths(path)
     for file_path in paths:
         if ".binvox" in file_path:
@@ -57,7 +57,7 @@ def main():
     assert 'ModelNet' in args.root_path, ("ONLY RUN THIS IN THE ModelNet folder!!!")
     # Essentially to overwrite what's already there
     if args.remove_all:
-        remove_all(args.root_path)
+        _remove_all(args.root_path)
 
     # actually do the conversion from *.off to *.binvox
     paths_generator = list_file_paths(args.root_path)
