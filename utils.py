@@ -36,13 +36,17 @@ def upsample_classes(arr, y_train):
     classes, class_counts = get_class_dist(y_train)
     upsample_amount = np.max(class_counts)
     class_skipped = classes[np.argmax(class_counts)]
+
+    # the highest class doesn't get upsampled
     new_arr = arr[y_train == class_skipped]
     new_y_train = y_train[y_train == class_skipped]
+
+    # upsample and append each class to the two new arrays that will be returned
     for nth_class in classes:
         # print('nth_class is: {}'.format(nth_class))
         nth_indices = indices[y_train == nth_class]
         if nth_class != class_skipped:
             sample_indices = np.random.choice(nth_indices, upsample_amount)
-            new_arr = np.append(new_arr, arr[sample_indices])
-            new_y_train = np.append(new_y_train, y_train[sample_indices])
+            new_arr = np.append(new_arr, arr[sample_indices], axis=0)
+            new_y_train = np.append(new_y_train, y_train[sample_indices], axis=0)
     return new_arr.astype(int), new_y_train.astype(int)
