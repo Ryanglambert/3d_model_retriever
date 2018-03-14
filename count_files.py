@@ -32,7 +32,7 @@ def make_file_description_data_frame(path='./ModelNet10/', show_missed=True):
     return pd.DataFrame(paths)
 
 
-def plot_class_balance(df, title):
+def plot_unbalanced_classes(df, title):
     grouped = df.groupby(['class', 'type'])['type'].count()
     unstacked = grouped.unstack()
     plt.figure()
