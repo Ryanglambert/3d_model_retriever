@@ -5,6 +5,7 @@ import binvox_rw_py as binvox
 
 
 def plot_class_balance():
+    "Visually inspect the balancing strategy is working"
     import matplotlib.pyplot as plt
     import pandas as pd
 
@@ -16,16 +17,16 @@ def plot_class_balance():
 
     train = pd.DataFrame(y_train)
     valid = pd.DataFrame(y_val)
-
+    # inspect that the validation set is representative of the training set
     train[0].value_counts().sort_values().plot(kind='bar', title='Train Labels')
     plt.figure()
     valid[0].value_counts().sort_values().plot(kind='bar', title='Validation Labels')
+
+    # inspect that the Training classes are balanced
     x_train, y_train = upsample_classes(x_train, y_train)
     train = pd.DataFrame(y_train)
     plt.figure()
-    train[0].value_counts().sort_values().plot(kind='bar', title='Training Class Balance')
-
-
+    train[0].value_counts().sort_values().plot(kind='bar', title='Training Class Balance After Upsampling')
 
 
 def plot_vox(mat):
