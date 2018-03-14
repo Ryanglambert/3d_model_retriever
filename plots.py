@@ -29,11 +29,12 @@ def plot_class_balance():
     train[0].value_counts().sort_values().plot(kind='bar', title='Training Class Balance After Upsampling')
 
 
-def plot_vox(mat):
+def plot_vox(mat, title='Title'):
     fig = plt.figure()
     ax = Axes3D(fig)
     ax.view_init(45, 135)
     ax.voxels(mat, edgecolor='k')
+    plt.title(title)
     plt.show()
 
 
