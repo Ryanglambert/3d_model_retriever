@@ -4,6 +4,30 @@ from mpl_toolkits.mplot3d import Axes3D
 import binvox_rw_py as binvox
 
 
+def plot_class_balance():
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    from data import load_data
+    from utils import upsample_classes, stratified_shuffle
+
+    (x_train, y_train), (x_test, y_test), target_names = load_data('./ModelNet10/')
+    x_train, y_train, x_val, y_val = stratified_shuffle(x_train, y_train, test_size=.2)
+
+    train = pd.DataFrame(y_train)
+    valid = pd.DataFrame(y_val)
+
+    train[0].value_counts().sort_values().plot(kind='bar', title='Train Labels')
+    plt.figure()
+    valid[0].value_counts().sort_values().plot(kind='bar', title='Validation Labels')
+    x_train, y_train = upsample_classes(x_train, y_train)
+    train = pd.DataFrame(y_train)
+    plt.figure()
+    train[0].value_counts().sort_values().plot(kind='bar', title='Training Class Balance')
+
+
+
+
 def plot_vox(mat):
     fig = plt.figure()
     ax = Axes3D(fig)
