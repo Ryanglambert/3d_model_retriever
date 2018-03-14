@@ -11,25 +11,32 @@ def get_class_dist(y_train):
     return classes, class_dist
 
 
-def get_upsample_amount(class_counts):
-    most_samples = class_counts[np.argmax(class_counts)]
-    num_upsample = most_samples - class_counts
-    return num_upsample
+def upsample_classes(arr, y_train):
+    """
+    Upsamples samples based on class distribution
 
+    Args:
+        arr: Numpy array of shape (n, p)
+        classes: Numpy array of shape (n,)
 
-def get_indices_by_class(arr):
-    return None
+    Return:
+        arr: Numpy array of shape (m, p) where m is now bigger than n
+    """
+    indices = np.indices(y_train.shape).reshape(-1)
+    classes, class_counts = get_class_dist(y_train)
+    upsample_amount = np.max(class_counts)
+    class_skipped = classes[np.argmax(class_counts)]
 
-
-def upsample(*arrs, n=0):
-    "sample with replacement"
-    # make sure same dim
-    for i, arr in enumerate(arrs[1::2]):
-        assert arrs[i].shape[0] == arrs[i+1].shape[0], "first dim must all be the same"
-    # make indices
-    indices = np.random.randint(0, arrs[0].shape[0], n)
-    # do sampling
-    new_arrs = []
-    for arr in arrs:
-        new_arrs.append(arr[indices])
-    return new_arrs
+    total_new_samples = upsample_amount * classes.shape[0]
+    new_arr = np.zeros((total_new_samples,) + arr.shape[1:])
+    new_y_train = np.zeros(total_new_samples)
+    for nth_class in classes:
+        nth_indices = indices[y_train == nth_class]
+        if nth_class == class_skipped:
+            new_arr[nth_indices] = arr[nth_indices]
+            new_y_train[nth_indices] = y_train[nth_indices]
+        else:
+            sample_indices = np.random.choice(nth_indices, upsample_amount)
+            new_arr[sample_indices] = arr[sample_indices]
+            new_y_train[sample_indices] = y_train[sample_indices]
+    return new_arr, new_y_train
