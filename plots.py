@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import scipy as sp
 
 import binvox_rw_py as binvox
 
@@ -60,3 +62,34 @@ def plot_learning_curves(history, epochs=200, y_min=0):
     plt.legend()
     plt.xlim(0, epochs)
     plt.ylim(y_min, 1)
+
+
+def _prediction(x, y, target_names, model):
+    truth = target_names[np.argmax(y)]
+    proba = model.predict(x)
+    proba_idx = np.argmax(proba)
+    predicted_name = target_names[proba_idx]
+    output = ("Model predicts a: {1} with {2:.2f} confidence\n"
+              "This is a {0}").format(
+                  truth, predicted_name, proba[0][proba_idx])
+    return output
+
+
+def plot_rotation_issue(x, y, target_names, model, angle, axes):
+    "Plot performance before and after with rotation"
+    x_rotated = sp.ndimage.interpolation.rotate(x.reshape(30, 30, 30), angle, axes, reshape=False)
+    fig = plt.figure(figsize=(10, 5))
+    ax = fig.add_subplot(121, projection='3d')
+    ax.view_init(45, 135)
+    ax.voxels(x.reshape(30, 30, 30), edgecolor='k')
+    plt.title(_prediction(x, y, target_names, model))
+    ax2 = fig.add_subplot(122, projection='3d')
+    ax2.view_init(45, 135)
+    ax2.voxels(x_rotated, edgecolor='k')
+    rotated_title = "Rotated by {} on {} axes".format(
+        angle, axes)
+    full_title = rotated_title + "\n" + \
+        _prediction(x_rotated.reshape(1, 30, 30, 30, 1), y, target_names, model)
+    plt.title(full_title)
+    plt.show()
+
