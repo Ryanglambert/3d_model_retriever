@@ -108,3 +108,49 @@ def plot_rotation_issue(x, y, target_names, model=None, angle=0, axes=(0, 1)):
         full_title = rotated_title
     plt.title(full_title)
     plt.show()
+
+
+def _prediction_capsnet(x, y, target_names, model):
+    truth = target_names[np.argmax(y)]
+    proba, x_recon = model.predict(x)
+    proba_idx = np.argmax(proba)
+    predicted_name = target_names[proba_idx]
+    output = ("Model predicts a: {1} with {2:.2f} confidence\n"
+              "This is a {0}").format(
+                  truth, predicted_name, proba[0][proba_idx])
+    return output
+
+
+def plot_capsnet_rotation_issue(x, y, target_names, model=None, angle=0, axes=(0, 1)):
+    "plot performance before and after with rotation"
+    # do 90 degree rotations first
+    n_90_rotations = angle // 90
+    degrees_from_90 = np.mod(angle, 90)
+    x_rotated = np.rot90(x.reshape(30, 30, 30), n_90_rotations, axes=axes)
+    # do sub 90 degree rotations (weird behavior using interpolation near mod 90 == 0)
+    # something weird happens when I use interpolation close to 90
+    if degrees_from_90 > 0 and degrees_from_90 < 90:
+        x_rotated = sp.ndimage.interpolation.rotate(x_rotated, degrees_from_90, axes, reshape=False)
+    
+    # plot the normal model along with its prediction
+    fig = plt.figure(figsize=(10, 5))
+    ax = fig.add_subplot(121, projection='3d')
+    ax.view_init(45, 135)
+    ax.voxels(x.reshape(30, 30, 30), edgecolor='k')
+    plt.title(_prediction_capsnet(x, y, target_names, model)) if model else plt.title("normal")
+
+    # plot the rotated model along with its prediction
+    ax2 = fig.add_subplot(122, projection='3d')
+    ax2.view_init(45, 135)
+    ax2.voxels(x_rotated, edgecolor='k')
+    rotated_title = "rotated by {} on {} axes".format(
+        angle, axes)
+
+    # The title of the rotated includes the prediction if a model was passed
+    if model:
+        full_title = rotated_title + "\n" + \
+            _prediction_capsnet(x_rotated.reshape(1, 30, 30, 30, 1), y, target_names, model)
+    else:
+        full_title = rotated_title
+    plt.title(full_title)
+    plt.show()
