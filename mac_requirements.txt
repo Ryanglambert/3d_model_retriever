@@ -3,7 +3,6 @@ appnope==0.1.0
 astor==0.6.2
 astroid==1.6.1
 bleach==1.5.0
--e git+git@github.com:Ryanglambert/CapsNet-Keras.git@52b12022a839e611b27f96d09a16a2143bdd869b#egg=capsnet
 cycler==0.10.0
 decorator==4.2.1
 entrypoints==0.2.3
