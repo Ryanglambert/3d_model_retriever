@@ -201,3 +201,4 @@ def plot_shaded(arr_shaded,angle=320, exploded=True,
         plt.savefig(save_name)
     if not save_only:
         plt.show()
+    plt.close()
