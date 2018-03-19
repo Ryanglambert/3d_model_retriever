@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy as sp
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 
 import binvox_rw_py as binvox
 
@@ -153,4 +154,46 @@ def plot_capsnet_rotation_issue(x, y, target_names, model=None, angle=0, axes=(0
     else:
         full_title = rotated_title
     plt.title(full_title)
+    plt.show()
+
+def normalize(arr):
+    arr_min = np.min(arr)
+    return (arr-arr_min)/(np.max(arr)-arr_min)
+
+
+def explode(data):
+    shape_arr = np.array(data.shape)
+    size = shape_arr[:3]*2 - 1
+    exploded = np.zeros(np.concatenate([size, shape_arr[3:]]), dtype=data.dtype)
+    exploded[::2, ::2, ::2] = data
+    return exploded
+
+
+def expand_coordinates(indices):
+    x, y, z = indices
+    x[1::2, :, :] += 1
+    y[:, 1::2, :] += 1
+    z[:, :, 1::2] += 1
+    return x, y, z
+
+
+def plot_shaded(arr_shaded, angle=320, exploded=True, lims=(0, 60)):
+    facecolors = cm.gist_yarg(arr_shaded)
+    facecolors[:,:,:,-1] = arr_shaded
+    facecolors = explode(facecolors)
+
+    filled = facecolors[:,:,:,-1] != 0
+    if exploded:
+        x, y, z = np.indices(np.array(filled.shape) + 1)
+    else:
+        x, y, z = expand_coordinates(np.indices(np.array(filled.shape) + 1))
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.gca(projection='3d')
+    ax.view_init(30, angle)
+    ax.set_xlim(lims)
+    ax.set_ylim(lims)
+    ax.set_zlim(lims)
+
+    ax.voxels(x, y, z, filled, facecolors=facecolors)
     plt.show()
