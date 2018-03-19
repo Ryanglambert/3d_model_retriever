@@ -21,7 +21,6 @@ from keras import layers, models, optimizers
 from keras import backend as K
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
-from utils import combine_images
 from PIL import Image
 from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
@@ -153,7 +152,7 @@ def test(model, data, args):
     print('-'*30 + 'Begin: test' + '-'*30)
     print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0])
 
-    img = combine_images(np.concatenate([x_test[:50],x_recon[:50]]))
+    # img = combine_images(np.concatenate([x_test[:50],x_recon[:50]]))
     image = img * 255
     Image.fromarray(image.astype(np.uint8)).save(args.save_dir + "/real_and_recon.png")
     print()
@@ -181,7 +180,7 @@ def manipulate_latent(model, data, args):
 
     # x_recons = np.concatenate(x_recons)
 
-    img = combine_images(x_recons, height=16)
+    # img = combine_images(x_recons, height=16)
     # image = img*255
     Image.fromarray(image.astype(np.uint8)).save(args.save_dir + '/manipulate-%d.png' % args.digit)
     print('manipulated result saved to %s/manipulate-%d.png' % (args.save_dir, args.digit))
