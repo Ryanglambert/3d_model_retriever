@@ -177,7 +177,8 @@ def expand_coordinates(indices):
     return x, y, z
 
 
-def plot_shaded(arr_shaded, angle=320, exploded=True, lims=(0, 60)):
+def plot_shaded(arr_shaded,angle=320, exploded=True,
+                lims=(0, 60), save_only=False, save_name='<file_name>'):
     facecolors = cm.gist_yarg(arr_shaded)
     facecolors[:,:,:,-1] = arr_shaded
     facecolors = explode(facecolors)
@@ -196,4 +197,7 @@ def plot_shaded(arr_shaded, angle=320, exploded=True, lims=(0, 60)):
     ax.set_zlim(lims)
 
     ax.voxels(x, y, z, filled, facecolors=facecolors)
-    plt.show()
+    if save_name:
+        plt.savefig(save_name)
+    if not save_only:
+        plt.show()

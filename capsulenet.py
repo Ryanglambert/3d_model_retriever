@@ -179,10 +179,10 @@ def manipulate_latent(model, data, args):
             x_recon = model.predict([x, y, tmp])
             x_recons.append(x_recon)
 
-    x_recons = np.concatenate(x_recons)
+    # x_recons = np.concatenate(x_recons)
 
     img = combine_images(x_recons, height=16)
-    image = img*255
+    # image = img*255
     Image.fromarray(image.astype(np.uint8)).save(args.save_dir + '/manipulate-%d.png' % args.digit)
     print('manipulated result saved to %s/manipulate-%d.png' % (args.save_dir, args.digit))
     print('-' * 30 + 'End: manipulate' + '-' * 30)
