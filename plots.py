@@ -178,7 +178,7 @@ def expand_coordinates(indices):
 
 
 def plot_shaded(arr_shaded,angle=320, exploded=True,
-                lims=(0, 60), save_only=False, save_name='<file_name>'):
+                lims=(0, 60), save_only=False, save_name=None):
     facecolors = cm.gist_yarg(arr_shaded)
     facecolors[:,:,:,-1] = arr_shaded
     facecolors = explode(facecolors)
@@ -202,3 +202,17 @@ def plot_shaded(arr_shaded,angle=320, exploded=True,
     if not save_only:
         plt.show()
     plt.close()
+
+
+def plot_dots(arr_shaded, angle=320, lims=(0, 30), save_only=False, save_name=None,
+              dotsize_scale=1, dotsize_offset=0):
+    coords = binvox.dense_to_sparse(arr_shaded)
+    colors = cm.gist_yarg(arr_shaded.ravel())
+    dot_sizes = arr_shaded.ravel()*dotsize_scale - dotsize_offset
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.view_init(30, 30)
+    ax.scatter3D(coords[0], coords[1], coords[2],
+                 c=colors, s=dot_sizes, depthshade=False, marker='.')
+    plt.show()
+
