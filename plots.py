@@ -231,6 +231,7 @@ def plot_recons(x_sample, y_sample, dim_sub_capsule, manipulate_model,
             tmp[:, :, dim] = r
             x_recon = manipulate_model.predict([x_manipulate, y_manipulate, tmp])
             sub_list.append((r, x_recon))
+        x_recons.append(sub_list)
 
     fig = plt.figure(figsize=(14, 100))
     gridsize = (len(x_recons), len(x_recons[0]))
