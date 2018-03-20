@@ -216,3 +216,37 @@ def plot_dots(arr_shaded, angle=320, lims=(0, 30), save_only=False, save_name=No
                  c=colors, s=dot_sizes, depthshade=False, marker='.')
     plt.show()
 
+
+def plot_recons(x_sample, y_sample, dim_sub_capsule, manipulate_model,
+                proba_range=[-0.3, 0.0, 0.3], normalize_vals=True,
+                dotsize_scale=1, dotsize_offset=.1, additional_info=''):
+    n_class = y_sample.shape[0]
+    x_manipulate, y_manipulate = np.expand_dims(x_sample, 0), np.expand_dims(y_sample, 0)
+    noise = np.zeros([1, n_class, dim_sub_capsule])
+    x_recons = []
+    for dim in range(dim_sub_capsule):
+        sub_list = []
+        for r in proba_range:
+            tmp = np.copy(noise)
+            tmp[:, :, dim] = r
+            x_recon = manipulate_model.predict([x_manipulate, y_manipulate, tmp])
+            sub_list.append((r, x_recon))
+
+    fig = plt.figure(figsize=(14, 100))
+    gridsize = (len(x_recons), len(x_recons[0]))
+    plot_num = 1
+    capsule_num = 0
+    for sub_list in x_recons:
+        for proba, recon in sub_list:
+            coords = binvox.dense_to_sparse(recon.reshape(30, 30, 30))
+            colors = cm.viridis(recon.reshape(30, 30, 30).ravel())
+            recon = normalize(recon) if normalize_vals else recon
+            dot_sizes = recon.ravel() * dotsize_scale - dotsize_offset
+            ax = fig.add_subplot(gridsize[0], gridsize[1], plot_num, projection='3d')
+            ax.scatter3D(coords[0], coords[1], coords[2],
+                         c=colors, s=dot_sizes, depthshade=False, marker='.')
+            ax.set_title('Capsule: {} at {} proba'.format(capsule_num, proba))
+            plot_num += 1
+        capsule_num += 1
+    plt.show()
+
