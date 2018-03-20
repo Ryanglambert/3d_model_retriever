@@ -1,4 +1,7 @@
 """
+Ryan's using this file mostly as a template.
+
+
 Keras implementation of CapsNet in Hinton's paper Dynamic Routing Between Capsules.
 The current version maybe only works for TensorFlow backend. Actually it will be straightforward to re-write to TF code.
 Adopting to other backends should be easy, but I have not tested this. 
