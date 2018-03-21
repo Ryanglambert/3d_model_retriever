@@ -233,7 +233,7 @@ def plot_recons(x_sample, y_sample, dim_sub_capsule, manipulate_model,
             sub_list.append((r, x_recon))
         x_recons.append(sub_list)
 
-    fig = plt.figure(figsize=(14, 100))
+    fig = plt.figure(figsize=(14, dim_sub_capsule*4))
     gridsize = (len(x_recons), len(x_recons[0]))
     plot_num = 1
     capsule_num = 0
