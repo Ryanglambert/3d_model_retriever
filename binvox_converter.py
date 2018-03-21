@@ -13,12 +13,25 @@ else:
     raise SystemError('System is not of type darwin or linux, what kind of system are you using?')
 
 
+def get_rid_of_misplaced_text(path):
+    with open(path, 'r') as f:
+        text = f.read()
+
+    if text[:3] == 'OFF':
+        new_text = 'OFF\n' + text[3:]
+        with open(path, 'w') as f:
+            f.write(new_text)
+
+
 def convert_off_to_binvox(path, dim=30):
     "Converts *.off file to *.binvox"
     if ".off" not in path:
         print("{} is not an '*.off' file... skipping".format(path))
         return
 
+    get_rid_of_misplaced_text(path)
+
+    print('CONVERTING {}'.format(path))
     process = subprocess.Popen(CMD.format(dim=dim, path=path).split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     if error:
@@ -56,7 +69,7 @@ def main():
     parser.add_argument('--remove-all-dupes', dest='remove_all', action='store_true')
     args = parser.parse_args()
 
-    assert 'ModelNet' in args.root_path, ("ONLY RUN THIS IN THE ModelNet folder!!!")
+    # assert 'ModelNet' in args.root_path, ("ONLY RUN THIS IN THE ModelNet folder!!!")
     # Essentially to overwrite what's already there
     if args.remove_all:
         _remove_all(args.root_path)
