@@ -1,4 +1,5 @@
 __pycache__/
+logs/
 *.swp
 .DS_Store
 *.hdf5
