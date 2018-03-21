@@ -1,3 +1,4 @@
+'ModelNet40 takes forever, also this should get cleaned up'
 import numpy as np
 import scipy as sp
 
@@ -27,7 +28,7 @@ input_shape = (30, 30, 30, 1)
 
 dim_sub_capsule = 16
 dim_primary_capsule = 8
-n_channels = 4
+n_channels = 32
 primary_cap_kernel_size = 9
 
 first_layer_kernel_size = 9
