@@ -96,6 +96,14 @@ class CapsuleLayer(layers.Layer):
         self.routings = routings
         self.kernel_initializer = initializers.get(kernel_initializer)
 
+    def get_config(self):
+        config = {'num_capsule': self.num_capsule,
+                  'dim_capsule': self.dim_capsule,
+                  'routings': self.routings,
+                  'kernel_initializer': self.kernel_initializer}
+        base_config = super(CapsuleLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
     def build(self, input_shape):
         assert len(input_shape) >= 3, "The input Tensor should have shape=[None, input_num_capsule, input_dim_capsule]"
         self.input_num_capsule = input_shape[1]
