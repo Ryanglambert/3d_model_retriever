@@ -27,23 +27,30 @@ n_class = y_test.shape[1]
 input_shape = (30, 30, 30, 1)
 
 dim_sub_capsule = 16
-dim_primary_capsule = 8
-n_channels = 32
+dim_primary_capsule = 5
+n_channels = 8
 primary_cap_kernel_size = 9
 
 first_layer_kernel_size = 9
 conv_layer_filters = 48
 
 #### Build us a model
-with tf.device("/cpu:0"):
+with tf.device("/cpu:1"):
     x = Input(shape=(30, 30, 30, 1))
 
     conv1 = Conv3D(filters=conv_layer_filters, kernel_size=first_layer_kernel_size,
                    strides=1, padding='valid', activation='relu', name='conv1')(x)
 
     primarycaps = PrimaryCap(conv1, dim_capsule=dim_primary_capsule, n_channels=n_channels,
-                             kernel_size=primary_cap_kernel_size, strides=2, padding='valid')
+                             kernel_size=primary_cap_kernel_size, strides=2, padding='valid',
+                             name='primarycap_conv3d')
 
+    # secondarycaps = PrimaryCap(primarycaps, dim_capsule=8, n_channels=8,
+    #                            kernel_size=9, strides=1, padding='valid',
+    #                            name='secondarycap_conv3d')
+
+    # sub_caps = CapsuleLayer(num_capsule=n_class, dim_capsule=dim_sub_capsule,
+    #                          routings=3, name='sub_caps')(secondarycaps)
     sub_caps = CapsuleLayer(num_capsule=n_class, dim_capsule=dim_sub_capsule,
                              routings=3, name='sub_caps')(primarycaps)
 
@@ -76,23 +83,23 @@ with tf.device("/cpu:0"):
     manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
 
 # compile and train the model
-NUM_EPOCHS = 300
-INIT_LR = 0.0001
+NUM_EPOCHS = 5
+INIT_LR = 0.0008
 lam_recon = .04
 optimizer = Adam(lr=INIT_LR)
 
-train_model = multi_gpu_model(train_model, gpus=2)
+train_model = multi_gpu_model(train_model, gpus=8)
 train_model.compile(optimizer,
                     loss=[margin_loss, 'mse'],
                     loss_weights=[1., lam_recon],
                     metrics={'capsnet': 'accuracy'})
 
-checkpointer = ModelCheckpoint(filepath='example.hdf5',
-                               verbose=1, save_best_only=True)
+# checkpointer = ModelCheckpoint(filepath='example.hdf5',
+#                                verbose=1, save_best_only=True)
 tb = TensorBoard(log_dir='logs/capsnet_modelnet40.log/')
 
 train_model.fit([x_train, y_train], [y_train, x_train],
-                                batch_size=256, epochs=NUM_EPOCHS,
+                                batch_size=64, epochs=NUM_EPOCHS,
                                 validation_data=[[x_val, y_val], [y_val, x_val]],
                 #                 callbacks=[tb, checkpointer])
                                 callbacks=[tb])

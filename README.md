@@ -89,3 +89,7 @@ from data import load_data
 
 
 ## Build The Models...
+
+Performance on ModelNet40: 82.29% accuracy against Test set
+
+Performance on ModelNet10: 88.5% accuracy against Test set
