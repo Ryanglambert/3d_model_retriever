@@ -55,3 +55,15 @@ def load_data(dp):
     y_train = np.array(y_train)
     y_test = np.array(y_test)
     return (x_train, y_train), (x_test, y_test), target_names
+
+
+def load_custom_model(model_path):
+    from keras.utils import CustomObjectScope
+    from keras.models import load_model
+    from capsulenet import margin_loss
+    from capsulelayers import CapsuleLayer, Mask, Length
+
+    with CustomObjectScope({'CapsuleLayer': CapsuleLayer,
+                            'Mask': Mask, 'Length': Length,
+                            'margin_loss': margin_loss}):
+        return load_model(model_path)

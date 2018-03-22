@@ -97,6 +97,7 @@ class CapsuleLayer(layers.Layer):
         self.kernel_initializer = initializers.get(kernel_initializer)
 
     def get_config(self):
+        """overloading this allows us to actually save this model"""
         config = {'num_capsule': self.num_capsule,
                   'dim_capsule': self.dim_capsule,
                   'routings': self.routings,
