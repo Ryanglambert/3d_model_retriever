@@ -4,7 +4,7 @@ import scipy as sp
 
 import tensorflow as tf
 from keras import backend as K
-from keras.callbacks import ModelCheckpoint, TensorBoard
+from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
 from keras.layers import Add, Conv3D, Dense, Input, Reshape
 from keras.models import Model, Sequential
 from keras.optimizers import Adam
@@ -83,8 +83,8 @@ with tf.device("/cpu:1"):
     manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
 
 # compile and train the model
-NUM_EPOCHS = 5
-INIT_LR = 0.0008
+NUM_EPOCHS = 50
+INIT_LR = 0.0001
 lam_recon = .04
 optimizer = Adam(lr=INIT_LR)
 
@@ -93,14 +93,18 @@ train_model.compile(optimizer,
                     loss=[margin_loss, 'mse'],
                     loss_weights=[1., lam_recon],
                     metrics={'capsnet': 'accuracy'})
-
+early_stop = EarlyStopping(monitor='val_capsnet_acc',
+                           min_delta=0,
+                           patience=4,
+                           verbose=1,
+                           mode='auto')
 
 tb = TensorBoard(log_dir='logs/capsnet_modelnet40.log/')
 train_model.fit([x_train, y_train], [y_train, x_train],
                                 batch_size=64, epochs=NUM_EPOCHS,
                                 validation_data=[[x_val, y_val], [y_val, x_val]],
                 #                 callbacks=[tb, checkpointer])
-                                callbacks=[tb])
+                                callbacks=[tb, early_stop])
 
 
 y_pred, x_recon = eval_model.predict(x_test)
