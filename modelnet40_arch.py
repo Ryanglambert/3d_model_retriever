@@ -94,10 +94,8 @@ train_model.compile(optimizer,
                     loss_weights=[1., lam_recon],
                     metrics={'capsnet': 'accuracy'})
 
-# checkpointer = ModelCheckpoint(filepath='example.hdf5',
-#                                verbose=1, save_best_only=True)
-tb = TensorBoard(log_dir='logs/capsnet_modelnet40.log/')
 
+tb = TensorBoard(log_dir='logs/capsnet_modelnet40.log/')
 train_model.fit([x_train, y_train], [y_train, x_train],
                                 batch_size=64, epochs=NUM_EPOCHS,
                                 validation_data=[[x_val, y_val], [y_val, x_val]],
@@ -106,7 +104,11 @@ train_model.fit([x_train, y_train], [y_train, x_train],
 
 
 y_pred, x_recon = eval_model.predict(x_test)
+test_accuracy = np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0]
 
-print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0])
+print('Test acc:', test_accuracy)
+print('Saving Models...')
+train_model.save('models/train_model_net40_acc_{}.hdf5'.format(str(round(test_accuracy, 5)).replace('.', '')))
+eval_model.save('models/eval_model_net40_acc_{}.hdf5'.format(str(round(test_accuracy, 5)).replace('.', '')))
+manipulate_model.save('models/manipulate_model_net40_acc_{}.hdf5'.format(str(round(test_accuracy, 5)).replace('.', '')))
 
-train_model.save_weights('modelnet40.last.hdf5')
