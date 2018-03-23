@@ -267,3 +267,64 @@ def plot_recons(x_sample, y_sample, dim_sub_capsule, manipulate_model,
         capsule_num += 1
     plt.show()
 
+
+def plot_compare_recons(x_sample_1, x_sample_2, y_sample_1, y_sample_2, dim_sub_capsule, manipulate_model,
+                        proba_range=[-0.3, 0.0, 0.3], normalize_vals=True,
+                        dotsize_scale=1, dotsize_offset=.1, additional_info='', target_names=[]):
+    n_class = y_sample_1.shape[0]
+    x_manipulate_1, y_manipulate_1 = np.expand_dims(x_sample_1, 0), np.expand_dims(y_sample_1, 0)
+    x_manipulate_2, y_manipulate_2 = np.expand_dims(x_sample_2, 0), np.expand_dims(y_sample_2, 0)
+    noise = np.zeros([1, n_class, dim_sub_capsule])
+    x_recons_1 = []
+    x_recons_2 = []
+    for dim in range(dim_sub_capsule):
+        sub_list_1 = []
+        sub_list_2 = []
+        for r in proba_range:
+            tmp = np.copy(noise)
+            tmp[:, :, dim] = r
+            x_recon_1 = manipulate_model.predict([x_manipulate_1, y_manipulate_1, tmp])
+            x_recon_2 = manipulate_model.predict([x_manipulate_2, y_manipulate_2, tmp])
+            sub_list_1.append((r, x_recon_1))
+            sub_list_2.append((r, x_recon_2))
+        x_recons_1.append(sub_list_1)
+        x_recons_2.append(sub_list_2)
+
+    fig = plt.figure(figsize=(14, dim_sub_capsule*8))
+    gridsize = (2*len(x_recons_1), len(x_recons_1[0]))
+    plot_num = 1
+    capsule_num = 0
+    for sub_list_1, sub_list_2 in zip(x_recons_1, x_recons_2):
+        for proba, recon in sub_list_1:
+            coords = binvox.dense_to_sparse(recon.reshape(30, 30, 30))
+            colors = cm.viridis(recon.reshape(30, 30, 30).ravel())
+            recon = normalize(recon) if normalize_vals else recon
+            dot_sizes = recon.ravel() * dotsize_scale - dotsize_offset
+            ax = fig.add_subplot(gridsize[0], gridsize[1], plot_num, projection='3d')
+            ax.scatter3D(coords[0], coords[1], coords[2],
+                         c=colors, s=dot_sizes, depthshade=False, marker='.')
+            title = 'Capsule: {} at {} proba'.format(capsule_num, proba)
+            if target_names:
+                title = target_names[np.argmax(y_sample_1)] + '\n' + title
+            title = 'ITEM: 1    ' + title
+            ax.set_title(title)
+            # ax.set_facecolor('xkcd:blue')
+            plot_num += 1
+        for proba, recon in sub_list_2:
+            coords = binvox.dense_to_sparse(recon.reshape(30, 30, 30))
+            colors = cm.viridis(recon.reshape(30, 30, 30).ravel())
+            recon = normalize(recon) if normalize_vals else recon
+            dot_sizes = recon.ravel() * dotsize_scale - dotsize_offset
+            ax = fig.add_subplot(gridsize[0], gridsize[1], plot_num, projection='3d')
+            ax.scatter3D(coords[0], coords[1], coords[2],
+                         c=colors, s=dot_sizes, depthshade=False, marker='.')
+            title = 'Capsule: {} at {} proba'.format(capsule_num, proba)
+            if target_names:
+                title = target_names[np.argmax(y_sample_1)] + '\n' + title
+            title = 'ITEM: 2    ' + title
+            ax.set_title(title)
+            ax.set_facecolor('grey')
+            plot_num += 1
+        capsule_num += 1
+    plt.show()
+
