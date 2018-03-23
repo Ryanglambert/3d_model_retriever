@@ -32,12 +32,15 @@ def plot_class_balance():
     train[0].value_counts().sort_values().plot(kind='bar', title='Training Class Balance After Upsampling')
 
 
-def plot_vox(mat, title='Title'):
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    ax.view_init(45, 135)
-    ax.voxels(mat, edgecolor='k')
-    plt.title(title)
+def plot_vox(*mats, title='Title'):
+    num_mats = len(mats)
+    fig = plt.figure(figsize=(4*num_mats, 4))
+    for i, mat in enumerate(mats):
+        # ax = Axes3D(fig)
+        ax = fig.add_subplot(1, num_mats, i+1, projection='3d')
+        ax.view_init(45, 135)
+        ax.voxels(mat.reshape(30, 30, 30), edgecolor='k')
+        plt.title(title + ' ' + str(i))
     plt.show()
 
 
@@ -179,6 +182,19 @@ def expand_coordinates(indices):
 
 def plot_shaded(arr_shaded,angle=320, exploded=True,
                 lims=(0, 60), save_only=False, save_name=None):
+    """
+    arr_shaded : np.array
+        3xN array
+    angle : int
+        view_init angle to plot at
+    exploded : bool
+        whether or not to explode the points to double their original bounds
+        i.e. 30 cube -> 60 cube with spaces between everything
+    save_only : bool
+        whether to skip showing the output and just save
+    save_name : str
+        what name to save the plot as
+    """
     facecolors = cm.gist_yarg(arr_shaded)
     facecolors[:,:,:,-1] = arr_shaded
     facecolors = explode(facecolors)
@@ -205,11 +221,11 @@ def plot_shaded(arr_shaded,angle=320, exploded=True,
 
 
 def plot_dots(arr_shaded, angle=320, lims=(0, 30), save_only=False, save_name=None,
-              dotsize_scale=1, dotsize_offset=0):
+              dotsize_scale=1, dotsize_offset=0, figsize=(4, 4)):
     coords = binvox.dense_to_sparse(arr_shaded)
     colors = cm.gist_yarg(arr_shaded.ravel())
     dot_sizes = arr_shaded.ravel()*dotsize_scale - dotsize_offset
-    fig = plt.figure()
+    fig = plt.figure(figsize=figsize)
     ax = fig.gca(projection='3d')
     ax.view_init(30, 30)
     ax.scatter3D(coords[0], coords[1], coords[2],

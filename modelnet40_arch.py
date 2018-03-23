@@ -4,7 +4,7 @@ import scipy as sp
 
 import tensorflow as tf
 from keras import backend as K
-from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
+from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping, ReduceLROnPlateau
 from keras.layers import Add, Conv3D, Dense, Input, Reshape
 from keras.models import Model, Sequential
 from keras.optimizers import Adam
@@ -84,28 +84,38 @@ with tf.device("/cpu:1"):
 
 # compile and train the model
 NUM_EPOCHS = 50
-INIT_LR = 0.0001
+INIT_LR = 0.008
 lam_recon = .04
 optimizer = Adam(lr=INIT_LR)
 
-train_model = multi_gpu_model(train_model, gpus=8)
-train_model.compile(optimizer,
+# train_model = multi_gpu_model(train_model, gpus=8)
+multi_model = multi_gpu_model(train_model, gpus=8)
+# train_model.compile(optimizer,
+#                     loss=[margin_loss, 'mse'],
+#                     loss_weights=[1., lam_recon],
+#                     metrics={'capsnet': 'accuracy'})
+multi_model.compile(optimizer,
                     loss=[margin_loss, 'mse'],
                     loss_weights=[1., lam_recon],
                     metrics={'capsnet': 'accuracy'})
 early_stop = EarlyStopping(monitor='val_capsnet_acc',
                            min_delta=0,
-                           patience=4,
+                           patience=7,
                            verbose=1,
                            mode='auto')
-
+reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.2,
+                              patience=3, min_lr=0.0001)
 tb = TensorBoard(log_dir='logs/capsnet_modelnet40.log/')
-train_model.fit([x_train, y_train], [y_train, x_train],
+# train_model.fit([x_train, y_train], [y_train, x_train],
+#                                 batch_size=64, epochs=NUM_EPOCHS,
+#                                 validation_data=[[x_val, y_val], [y_val, x_val]],
+#                 #                 callbacks=[tb, checkpointer])
+#                                 callbacks=[tb, early_stop])
+multi_model.fit([x_train, y_train], [y_train, x_train],
                                 batch_size=64, epochs=NUM_EPOCHS,
                                 validation_data=[[x_val, y_val], [y_val, x_val]],
                 #                 callbacks=[tb, checkpointer])
-                                callbacks=[tb, early_stop])
-
+                                callbacks=[tb, reduce_lr, early_stop])
 
 y_pred, x_recon = eval_model.predict(x_test)
 test_accuracy = np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0]
