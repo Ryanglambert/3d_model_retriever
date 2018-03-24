@@ -79,12 +79,12 @@ def _prediction(x, y, target_names, model):
     return output
 
 
-def quick_plot(arr, figsize=(4, 4)):
+def quick_plot(arr, figsize=(4, 4), color='black', dotsize=4):
     "quickly plot a model as scatter instead of voxels (FASTER) good lord they are slow"
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111, projection='3d')
     z, x, y = (arr.reshape(30, 30, 30).astype(int)).nonzero()
-    ax.scatter(x, y, z, zdir='z', depthshade=False, s=4)
+    ax.scatter(x, y, z, zdir='z', depthshade=False, s=dotsize, color=color)
     ax.set_xlim((0, 30))
     ax.set_ylim((0, 30))
     ax.set_zlim((0, 30))
