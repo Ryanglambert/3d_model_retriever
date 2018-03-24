@@ -55,6 +55,33 @@ def class_subset(x, y, class_name, class_name_list):
     return x[class_indices], y[class_indices]
 
 
+def query_corpus(latent_object, latent_corpus, query_size=10):
+    """Query a latent corpus (bottleneck features from NN)
+    latent_object : np.array
+        object as represented in an N-D space
+    latent_corpus : np.array
+        matrix of N-d latent vectors each representing a model
+        in your associated corpus
+    query_size : int
+        number of relevant items to retrieve
+
+    Returns
+    -------
+    top_n_sorted_sims : np.array
+        cosine similarities for the top n rows in latent_corpus
+        where n is specified by `query_size`
+    top_n_sorted_indices : np.array
+        indices of top n rows from the latent_corpus
+    """
+    sims = latent_corpus.dot(latent_object.T)
+    sorted_sims_indices = np.argpartition(sims,
+                                          range(-query_size, 0),
+                                          axis=0)
+    top_n_sorted_indices = sorted_sims_indices[:-query_size-1:-1]
+    top_n_sorted_sims = sims[top_n_sorted_indices].reshape(-1, 1)
+    return top_n_sorted_sims, top_n_sorted_indices
+
+
 def upsample_classes(arr, y_train):
     """Naively upsamples to the class with the highest count
     Balancing all the classes in your training set
