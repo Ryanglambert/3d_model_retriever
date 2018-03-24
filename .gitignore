@@ -6,6 +6,7 @@ logs/
 .env/
 .vscode/
 .ipynb_checkpoints/
+latent_space_corpora/*
 *.zip
 ModelNet10/
 ModelNet40/

@@ -16,7 +16,19 @@ def get_class_dist(y_train):
 
 
 def stratified_shuffle(arr, y_train, test_size=0.2):
-    "Stratified and shuffled sample of classes"
+    """Stratified shuffled train val split
+    Ensures validation set is representative of the class
+    distribution in the given dataset.
+    arr : np.array
+    y_train : np.array
+
+    Returns
+    -------
+    x_train : np.array
+    y_train : np.array
+    x_val : np.array
+    y_val : np.array
+    """
     from sklearn.model_selection import StratifiedShuffleSplit
     sss = StratifiedShuffleSplit(1, test_size=test_size)
     split = [i for i in sss.split(arr, y_train)]
@@ -24,17 +36,38 @@ def stratified_shuffle(arr, y_train, test_size=0.2):
     return arr[train_idx], y_train[train_idx], arr[val_idx], y_train[val_idx]
 
 
-def upsample_classes(arr, y_train):
+def class_subset(x, y, class_name, class_name_list):
+    """Gets subsets of x and y based on class_name
+    x : np.array
+    y : np.array
+        dummy variable style (columns for each class)
+    class_name : str
+    class_name_list : list[str's]
+    class_subset(x_test, y_test, 'glass_box', target_names)
+    Returns
+    -------
+    x : np.array
+        subset from given x
+    y : np.array
+        subset from given y
     """
-    Naively upsamples to the class with the highest count
-    Balancing all the classes
+    class_indices = np.argmax(y, axis=1) == class_name_list.index(class_name)
+    return x[class_indices], y[class_indices]
 
-    Args:
-        arr: Numpy array of shape (n, p)
-        classes: Numpy array of shape (n,)
 
-    Return:
-        arr: Numpy array of shape (m, p) where m is now bigger than n
+def upsample_classes(arr, y_train):
+    """Naively upsamples to the class with the highest count
+    Balancing all the classes in your training set
+
+    arr : np.array
+    classes: np.array
+
+    Returns
+    -------
+    arr : np.array
+        upsampled array balancing based on y_train array
+    y_train : np.array
+        labels associated with the upsampled arr
     """
     indices = np.indices(y_train.shape).reshape(-1)
     classes, class_counts = get_class_dist(y_train)
