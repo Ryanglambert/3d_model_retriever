@@ -50,9 +50,13 @@ def class_subset(x, y, class_name, class_name_list):
         subset from given x
     y : np.array
         subset from given y
+    original_indices : np.array
+        the corresponding indices to the original arrays
+        so you know where you came from
     """
     class_indices = np.argmax(y, axis=1) == class_name_list.index(class_name)
-    return x[class_indices], y[class_indices]
+    original_indices = np.arange(0, x.shape[0])[class_indices]
+    return x[class_indices], y[class_indices], original_indices
 
 
 def query_corpus(latent_object, latent_corpus, query_size=10):
@@ -77,8 +81,8 @@ def query_corpus(latent_object, latent_corpus, query_size=10):
     sorted_sims_indices = np.argpartition(sims,
                                           range(-query_size, 0),
                                           axis=0)
-    top_n_sorted_indices = sorted_sims_indices[:-query_size-1:-1]
-    top_n_sorted_sims = sims[top_n_sorted_indices].reshape(-1, 1)
+    top_n_sorted_indices = sorted_sims_indices[:-query_size-1:-1].ravel()
+    top_n_sorted_sims = sims[top_n_sorted_indices].ravel()
     return top_n_sorted_sims, top_n_sorted_indices
 
 
