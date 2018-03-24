@@ -79,6 +79,19 @@ def _prediction(x, y, target_names, model):
     return output
 
 
+def quick_plot(arr, figsize=(4, 4)):
+    "quickly plot a model as scatter instead of voxels (FASTER) good lord they are slow"
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot(111, projection='3d')
+    z, x, y = (arr.reshape(30, 30, 30).astype(int)).nonzero()
+    ax.scatter(x, y, z, zdir='z', depthshade=False, s=4)
+    ax.set_xlim((0, 30))
+    ax.set_ylim((0, 30))
+    ax.set_zlim((0, 30))
+    plt.show()
+
+
+
 def plot_rotation_issue(x, y, target_names, model=None, angle=0, axes=(0, 1)):
     "plot performance before and after with rotation"
     # do 90 degree rotations first
