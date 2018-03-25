@@ -36,6 +36,28 @@ def stratified_shuffle(arr, y_train, test_size=0.2):
     return arr[train_idx], y_train[train_idx], arr[val_idx], y_train[val_idx]
 
 
+def average_precision(ranked_relevant, num_relevant_retrievable):
+    """Calculate average precision for a ranked set
+    ranked_relevant : np.array
+        ranked boolean array for whether the rank contained a relevant result
+    num_relevant_retrievable : int
+        number of possible relevant documents
+    Returns
+    -------
+    average_precision : np.float64
+    """
+    # The rank will be used to divide to get precision for everything
+    # to that point
+    # based on: http://web.cecs.pdx.edu/~maier/cs510iri/IR_Lectures/CS_510iri_Lecture8RelevanceEvaluation-revised.pdf
+    # This is a tricky calculation to be honest
+    rank = np.arange(ranked_relevant.shape[0]) + 1
+    indices = np.arange(ranked_relevant.shape[0])
+    relevant_indices = np.zeros(ranked_relevant.shape[0])
+    relevant_indices[indices[ranked_relevant]] = \
+        np.cumsum(ranked_relevant[indices[ranked_relevant]])
+    return np.sum(relevant_indices/rank)/num_relevant_retrievable
+
+
 def class_subset(x, y, class_name, class_name_list):
     """Gets subsets of x and y based on class_name
     x : np.array
