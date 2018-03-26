@@ -32,7 +32,6 @@ y_test = to_categorical(y_test)
 y_val = to_categorical(y_val)
 
 
-####### Begin architecture####### Begin architecture####### Begin architecture####### Begin architecture####### Begin architecture
 n_class = y_test.shape[1]
 input_shape = (30, 30, 30, 1)
 
@@ -41,7 +40,6 @@ dim_sub_capsule = 16
 dim_primary_capsule = 8
 n_channels = 4
 primary_cap_kernel_size = 9
-
 first_layer_kernel_size = 9
 conv_layer_filters = 48
 
@@ -85,14 +83,18 @@ manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
 
 
 
-##### IF USING MULTIPLE GPUS ######
+
+################################ Compile and Train ###############################
+##### IF USING MULTIPLE GPUS APPLY JUST BEFORE COMPILING ######
 # train_model = multi_gpu_model(train_model, gpus=8) #### Adjust for number of gpus
 # train_model = multi_gpu_model(train_model, gpus=2) #### Adjust for number of gpus
 ##### IF USING MULTIPLE GPUS ######
+x_train, y_train = x_train[:512], y_train[:512]
+x_val, y_val = x_val[:20], y_val[:20]
+x_test, y_test = x_test[:100], y_test[:100]
 
-################################ Compile and Train ###############################
 lam_recon = .04
-NUM_EPOCHS = 22
+NUM_EPOCHS = 1
 INIT_LR = .003
 optimizer = Adam(lr=INIT_LR)
 train_model.compile(optimizer,
@@ -117,7 +119,7 @@ train_model.fit([x_train, y_train], [y_train, x_train],
                                 callbacks=[tb, csv, reduce_lr, early_stop])
 
 
-################################ Compile and Train ###############################
+################################ Process the results ###############################
 process_results(NAME, train_model, eval_model,
                 manipulate_model, x_test, y_test,
                 INIT_LR=INIT_LR,
