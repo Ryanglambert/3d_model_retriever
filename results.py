@@ -42,8 +42,7 @@ def _make_latent_model(model, layer=-3):
     return Model(model.input, model.layers[layer].output)
 
 
-def _mean_average_precision(latent_model, latent_space, x_test, y_test):
-    """Calculate mean precision"""
+def _get_average_precisions(latent_model, latent_space, x_test, y_test):
     average_precisions = np.zeros(x_test.shape[0])
     for i in range(x_test.shape[0]):
         if i % 100 == 0:
@@ -59,9 +58,7 @@ def _mean_average_precision(latent_model, latent_space, x_test, y_test):
                             np.argmax(y_test[latent_indices], axis=1)
 
         average_precisions[i] = average_precision(ranked_relevant, num_retrievable)
-
-    mean_average_precision = np.mean(average_precisions)
-    return mean_average_precision
+    return average_precisions
 
 
 def _make_tsne_plots(eval_model, save_name: str):
@@ -106,9 +103,11 @@ def process_results(name: str, train_model, eval_model,
     accuracy = str(round(_accuracy(eval_model,
                                    x_test,
                                    y_test), 5)).replace('.', '')
-    mean_avg_prec = str(round(_mean_average_precision(latent_model,
-                                                      latent_space,
-                                                      x_test, y_test),5)).replace('.', '')
+    average_precisions = _get_average_precisions(latent_model,
+                                                 latent_space,
+                                                 x_test, y_test)
+    mean_average_precision = np.mean(average_precisions)
+    mean_avg_prec = str(round(mean_average_precision,5)).replace('.', '')
     dir_path = initialize_results_dir(name, accuracy, mean_avg_prec)
     _save_details(dir_path, **details)
 
