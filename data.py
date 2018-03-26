@@ -19,7 +19,7 @@ def _train_test_split_paths(dp, sub_path:str):
 
 def load_data(dp):
     """
-    Args: 
+    Args:
         dp: path to ModelNetXX folder which contains train and test folders
 
     Return:
