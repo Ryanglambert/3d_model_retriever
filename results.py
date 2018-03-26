@@ -77,10 +77,11 @@ def _make_filter_plots(manipulate_model):
 
 
 def _save_model_summary(model, path):
-    def myprint(s):
-        with open(os.path.join(path, 'modelsummary.txt'), 'w') as f:
-            print(s, file=f)
-    model.summary(print_fn=myprint)
+    # def myprint(s):
+    #     with open(os.path.join(path, 'modelsummary.txt'), 'w') as f:
+    #         print(s, file=f)
+    with open(os.path.join(path, 'modelsummary.txt'), 'w') as f:
+        model.summary(print_fn=lambda x: f.write(x + '\n'))
 
 
 def _accuracy(eval_model, x_test, y_test):

@@ -1,3 +1,0 @@
-INIT_LR,0.003
-lam_recon,0.04
-NUM_EPOCHS,1
