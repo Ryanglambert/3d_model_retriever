@@ -99,6 +99,7 @@ def _save_details(path, **kwargs):
 
 def process_results(name: str, train_model, eval_model,
                     manipulate_model, x_test, y_test, **details):
+    "Takes all outputs you care about and logs them to results folder"
     latent_model = _make_latent_model(eval_model)
     latent_space = _make_latent_space(latent_model, x_test)
     accuracy = str(round(_accuracy(eval_model,
@@ -122,6 +123,7 @@ def process_results(name: str, train_model, eval_model,
 
     # save tsne plots
         # also as gifs
+    # save confusion matrix
     # save precision recall plots
     # save filter plots
 

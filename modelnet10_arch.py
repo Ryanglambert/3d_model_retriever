@@ -89,9 +89,6 @@ manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
 # train_model = multi_gpu_model(train_model, gpus=8) #### Adjust for number of gpus
 # train_model = multi_gpu_model(train_model, gpus=2) #### Adjust for number of gpus
 ##### IF USING MULTIPLE GPUS ######
-x_train, y_train = x_train[:512], y_train[:512]
-x_val, y_val = x_val[:20], y_val[:20]
-x_test, y_test = x_test[:100], y_test[:100]
 
 lam_recon = .04
 NUM_EPOCHS = 1
