@@ -3,6 +3,7 @@ logs/
 *.swp
 .DS_Store
 *.hdf5
+*.npy
 .env/
 .vscode/
 .ipynb_checkpoints/
