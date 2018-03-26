@@ -1,7 +1,7 @@
 import numpy as np
-import scipy as sp
-# from keras import layers, models, optimizers
-from keras.callbacks import TensorBoard, ModelCheckpoint
+from keras.callbacks import (TensorBoard,
+                             EarlyStopping,
+                             ReduceLROnPlateau)
 from keras.layers import Conv3D, Dense, Reshape, Add, Input
 from keras.models import Sequential, Model
 from keras.optimizers import SGD, Adam
@@ -9,23 +9,16 @@ from keras import backend as K
 from keras.utils import to_categorical, multi_gpu_model
 from keras.utils.vis_utils import plot_model
 import matplotlib.pyplot as plt
-from PIL import Image
 import tensorflow as tf
 
 from capsulenet import margin_loss
 from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
 from data import load_data
-from plots import (plot_vox,
-                                      plot_capsnet_rotation_issue,
-                                      plot_rotation_issue,
-                                      plot_shaded,
-                                      plot_dots,
-                                      plot_recons)
 from utils import upsample_classes, stratified_shuffle
 
 
-(x_train, y_train), (x_test, y_test), target_names = load_data('./ModelNet10/')
+(x_train, y_train), (x_test, y_test), target_names = load_data(DATA_PATH)
 x_train, y_train, x_val, y_val = stratified_shuffle(x_train, y_train, test_size=.1)
 x_train, y_train = upsample_classes(x_train, y_train)
 y_train = to_categorical(y_train)
@@ -33,8 +26,14 @@ y_test = to_categorical(y_test)
 y_val = to_categorical(y_val)
 
 
+DATA_PATH = './ModelNet10'
+RESULTS_PATH = './results/'
+
+
+####### Begin architecture####### Begin architecture####### Begin architecture####### Begin architecture####### Begin architecture
 n_class = y_test.shape[1]
 input_shape = (30, 30, 30, 1)
+
 
 dim_sub_capsule = 16
 dim_primary_capsule = 8
@@ -57,37 +56,39 @@ sub_caps = CapsuleLayer(num_capsule=n_class, dim_capsule=dim_sub_capsule,
                                                  routings=3, name='sub_caps')(primarycaps)
 out_caps = Length(name='capsnet')(sub_caps)
 
+# Decoder network
 y = Input(shape=(n_class,))
 masked_by_y = Mask()([sub_caps, y])
 masked = Mask()(sub_caps)
 
+# shared decoder model in training and prediction
 decoder = Sequential(name='decoder')
 decoder.add(Dense(512, activation='relu',
                   input_dim=dim_sub_capsule*n_class))
-# decoder.add(Dense(64, activation='relu'))
 decoder.add(Dense(1024, activation='relu'))
 decoder.add(Dense(np.prod(input_shape), activation='sigmoid'))
 decoder.add(Reshape(target_shape=input_shape, name='out_recon'))
 
 
-### Different kinds of models
+### Models for training and evaluation (prediction and actually using)
 train_model = Model([x, y], [out_caps, decoder(masked_by_y)])
 eval_model = Model(x, [out_caps, decoder(masked)])
 
-### manipulate model
+### manipulate model can be used to visualize activation maps for specific classes
 noise = Input(shape=(n_class, dim_sub_capsule))
 noised_sub_caps = Add()([sub_caps, noise])
 masked_noised_y = Mask()([noised_sub_caps, y])
 manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
 
 
+lam_recon = .04
+####### End architecture####### End architecture####### End architecture####### End architecture####### End architecture
 
 ### Training
 NUM_EPOCHS = 22
 INIT_LR = .0001
 
 optimizer = Adam(lr=INIT_LR)
-lam_recon = .04
 ##### IF USING MULTIPLE GPUS ######
 # train_model = multi_gpu_model(train_model, gpus=8) #### Adjust for number of gpus
 # train_model = multi_gpu_model(train_model, gpus=2) #### Adjust for number of gpus
@@ -97,7 +98,7 @@ train_model.compile(optimizer,
                     loss_weights=[1., lam_recon],
                     metrics={'capsnet': 'accuracy'})
 
-tb = TensorBoard(log_dir='logs/capsnet_modelnet10.log/')
+tb = TensorBoard(log_dir='logs/capsnet_{}.log/'.format(DATA_PATH))
 train_model.fit([x_train, y_train], [y_train, x_train],
                                 batch_size=256, epochs=NUM_EPOCHS,
                                 validation_data=[[x_val, y_val], [y_val, x_val]],
