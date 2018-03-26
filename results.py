@@ -1,3 +1,4 @@
+import csv
 import numpy as np
 import os
 
@@ -77,13 +78,29 @@ def _make_filter_plots(manipulate_model):
     return None
 
 
+def _save_model_summary(model, path):
+    def myprint(s):
+        with open(os.path.join(path, 'modelsummary.txt'), 'w') as f:
+            print(s, file=f)
+    model.summary(print_fn=myprint)
+
+
 def _accuracy(eval_model, x_test, y_test):
     y_pred, x_recon = eval_model.predict(x_test)
     test_accuracy = np.rum(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0]
     return test_accuracy
 
 
-def process_results(name: str, train_model, eval_model, manipulate_model, x_test, y_test):
+def _save_details(path, **kwargs):
+    file_path = os.path.join(path, 'details.txt')
+    with open(file_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in kwargs.items():
+            writer.writerow([key, value])
+
+
+def process_results(name: str, train_model, eval_model,
+                    manipulate_model, x_test, y_test, **details):
     latent_model = _make_latent_model(eval_model)
     latent_space = _make_latent_space(eval_model, x_test)
     accuracy = str(round(_accuracy(eval_model,
@@ -93,12 +110,15 @@ def process_results(name: str, train_model, eval_model, manipulate_model, x_test
                                                       latent_space,
                                                       x_test, y_test),5)).replace('.', '')
     dir_path = initialize_results_dir(name, accuracy, mean_avg_prec)
+    _save_details(dir_path, **details)
 
     # latent space and model
     latent_model.save(os.path.join(dir_path, MODELS, 'latent_model.hdf5'))
     np.save(os.path.join(dir_path, 'latent_space.npy'), latent_space)
     # all the other models hdf5 files
     train_model.save(os.path.join(dir_path, MODELS, 'train_model.hdf5'))
+    # only saving text of train_model since that contains everything we need to know
+    save_model_summary(train_model, dir_path)
     eval_model.save(os.path.join(dir_path, MODELS, 'eval_model.hdf5'))
     manipulate_model.save(os.path.join(dir_path, MODELS, 'manipulate_model.hdf5'))
 
@@ -110,5 +130,4 @@ def process_results(name: str, train_model, eval_model, manipulate_model, x_test
     # _make_tsne_plots(eval_model)
     # _make_precision_recall(eval_model)
     # _make_filter_plots(manipulate_model)
-    return None
 

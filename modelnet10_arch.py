@@ -1,7 +1,10 @@
 import numpy as np
+import os
+
 from keras.callbacks import (TensorBoard,
                              EarlyStopping,
-                             ReduceLROnPlateau)
+                             ReduceLROnPlateau,
+                             CSVLogger)
 from keras.layers import Conv3D, Dense, Reshape, Add, Input
 from keras.models import Sequential, Model
 from keras.optimizers import SGD, Adam
@@ -16,18 +19,17 @@ from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
 from data import load_data
 from utils import upsample_classes, stratified_shuffle
+from results import process_results
 
 
-(x_train, y_train), (x_test, y_test), target_names = load_data(DATA_PATH)
+NAME = 'ModelNet10'
+
+(x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
 x_train, y_train, x_val, y_val = stratified_shuffle(x_train, y_train, test_size=.1)
 x_train, y_train = upsample_classes(x_train, y_train)
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 y_val = to_categorical(y_val)
-
-
-DATA_PATH = './ModelNet10'
-RESULTS_PATH = './results/'
 
 
 ####### Begin architecture####### Begin architecture####### Begin architecture####### Begin architecture####### Begin architecture
@@ -81,37 +83,44 @@ masked_noised_y = Mask()([noised_sub_caps, y])
 manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
 
 
-lam_recon = .04
-####### End architecture####### End architecture####### End architecture####### End architecture####### End architecture
 
-### Training
-NUM_EPOCHS = 22
-INIT_LR = .0001
 
-optimizer = Adam(lr=INIT_LR)
 ##### IF USING MULTIPLE GPUS ######
 # train_model = multi_gpu_model(train_model, gpus=8) #### Adjust for number of gpus
 # train_model = multi_gpu_model(train_model, gpus=2) #### Adjust for number of gpus
 ##### IF USING MULTIPLE GPUS ######
+
+################################ Compile and Train ###############################
+lam_recon = .04
+NUM_EPOCHS = 22
+INIT_LR = .003
+optimizer = Adam(lr=INIT_LR)
 train_model.compile(optimizer,
                     loss=[margin_loss, 'mse'],
                     loss_weights=[1., lam_recon],
                     metrics={'capsnet': 'accuracy'})
 
-tb = TensorBoard(log_dir='logs/capsnet_{}.log/'.format(DATA_PATH))
+call_back_path = 'logs/capsnet_{}.log'.format(NAME)
+tb = TensorBoard(log_dir=call_back_path)
+csv = CSVLogger(os.path.join(call_back_path, 'training.log'))
+early_stop = EarlyStopping(monitor='val_capsnet_acc',
+                           min_delta=0,
+                           patience=12,
+                           verbose=1,
+                           mode='auto')
+reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.5,
+                              patience=3, min_lr=0.0001)
 train_model.fit([x_train, y_train], [y_train, x_train],
                                 batch_size=256, epochs=NUM_EPOCHS,
                                 validation_data=[[x_val, y_val], [y_val, x_val]],
                 #                 callbacks=[tb, checkpointer])
-                                callbacks=[tb])
+                                callbacks=[tb, csv, reduce_lr, early_stop])
 
-### Get test accuracy
-y_pred, x_recon = eval_model.predict(x_test)
-test_accuracy = np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0]
-print('Test acc:', test_accuracy)
 
-print('Saving Models...')
-train_model.save('models/train_model_net10_acc_{}.hdf5'.format(str(round(test_accuracy, 5)).replace('.', '')))
-eval_model.save('models/eval_model_net10_acc_{}.hdf5'.format(str(round(test_accuracy, 5)).replace('.', '')))
-manipulate_model.save('models/manipulate_model_net10_acc_{}.hdf5'.format(str(round(test_accuracy, 5)).replace('.', '')))
+################################ Compile and Train ###############################
+process_results(NAME, train_model, eval_model,
+                manipulate_model, x_test, y_test,
+                INIT_LR=INIT_LR,
+                lam_recon=lam_recon,
+                NUM_EPOCHS=NUM_EPOCHS)
 
