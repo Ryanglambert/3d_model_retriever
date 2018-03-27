@@ -27,7 +27,8 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 from capsulenet import margin_loss
-from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
+from capsulelayers import (CapsuleLayer, PrimaryCap,
+                           Length, Mask, Conv3DCap)
 
 from data import load_data
 from utils import upsample_classes, stratified_shuffle
@@ -262,14 +263,14 @@ def two_convcaps_layers(model_name='two_convcaps_layers',
 
 
 def main():
-    base_model(model_name='base_model',
-               dim_sub_capsule=16,
-               dim_primary_capsule=5,
-               n_channels=8,
-               primary_cap_kernel_size=9,
-               first_layer_kernel_size=9,
-               conv_layer_filters=48,
-               gpus=1)
+    # base_model(model_name='base_model',
+    #            first_layer_kernel_size=9,
+    #            conv_layer_filters=48,
+    #            primary_cap_kernel_size=9,
+    #            dim_primary_capsule=5,
+    #            n_channels=8,
+    #            dim_sub_capsule=16,
+    #            gpus=1)
 
     two_convcaps_layers(model_name='two_convcaps_layers',
                         conv_layer_filters=48,
@@ -281,7 +282,7 @@ def main():
                         dim_primary_capsule_2=5,
                         n_channels_2=5,
                         dim_sub_capsule=16,
-                        gpus=1):
+                        gpus=1)
 
 if __name__ == '__main__':
     main()

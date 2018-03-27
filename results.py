@@ -124,10 +124,10 @@ def save_tsne_plot(latent_space, path):
     plt.savefig(os.path.join(path, 'TSNE.png'), bbox_inches='tight')
 
 
-def save_confusion_matrix(y_test, y_pred, target_names, path):
+def save_confusion_matrix(y_test, y_pred, target_names, path, figsize=(15, 15)):
     import matplotlib.pyplot as plt
     cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
-    plt.figure()
+    plt.figure(figsize=figsize)
     plot_confusion_matrix(cm, target_names, normalize=True)
     plt.savefig(os.path.join(path, 'Confusion_matrix.png'), bbox_inches='tight')
 
