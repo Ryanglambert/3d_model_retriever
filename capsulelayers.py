@@ -181,6 +181,22 @@ def PrimaryCap(inputs, dim_capsule, n_channels, kernel_size, strides, padding, n
                              name='{}_reshape'.format(name))(output)
     return layers.Lambda(squash, name='{}_squash'.format(name))(outputs)
 
+
+def Conv3DCap(inputs, dim_capsule, n_channels, kernel_size, strides, padding, name):
+    """
+    Apply Conv3D `n_channels` times and concatenate all capsules
+    :param inputs: 5D tensor, shape=[None, width, height, depth, channels]
+    :param dim_capsule: the dim of the output vector of capsule
+    :param n_channels: the number of types of capsules
+    :return: output tensor, shape=[None, num_capsule, dim_capsule]
+    """
+    output = layers.Conv3D(filters=dim_capsule * n_channels, kernel_size=kernel_size, strides=strides, padding=padding,
+                           name=name)(inputs)
+    # outputs = layers.Reshape(target_shape=[-1, dim_capsule],
+    #                          name='{}_reshape'.format(name))(output)
+    outputs = output
+    return layers.Lambda(squash, name='{}_squash'.format(name))(outputs)
+
 ## Haven't finished fleshing out what I'm thinking here
 
 # def ConvCap(inputs, dim_capsule, n_channels, kernel_size, strides, padding, name):

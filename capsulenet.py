@@ -1,7 +1,7 @@
 """
 Ryan's using this file mostly as a template.
 
-
+```
 Keras implementation of CapsNet in Hinton's paper Dynamic Routing Between Capsules.
 The current version maybe only works for TensorFlow backend. Actually it will be straightforward to re-write to TF code.
 Adopting to other backends should be easy, but I have not tested this. 
@@ -17,6 +17,7 @@ Result:
     About 110 seconds per epoch on a single GTX1070 GPU card
     
 Author: Xifeng Guo, E-mail: `guoxifeng1990@163.com`, Github: `https://github.com/XifengGuo/CapsNet-Keras`
+```
 """
 
 import numpy as np
