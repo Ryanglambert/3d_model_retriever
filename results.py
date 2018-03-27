@@ -91,7 +91,7 @@ def _accuracy(eval_model, x_test, y_test):
 
 
 def _save_details(path, **kwargs):
-    file_path = os.path.join(path, 'details.txt')
+    file_path = os.path.join(path, 'details.csv')
     with open(file_path, 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in kwargs.items():
@@ -220,9 +220,4 @@ def process_results(name: str, train_model, eval_model,
     save_confusion_matrix(y_test, y_pred, target_names, dir_path)
     # save precision recall plots
     plot_precision_recall(y_test, y_pred, target_names, dir_path, save=True)
-    # save filter plots
-
-    # _make_tsne_plots(eval_model)
-    # _make_precision_recall(eval_model)
-    # _make_filter_plots(manipulate_model)
 

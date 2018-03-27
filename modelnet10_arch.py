@@ -35,16 +35,20 @@ from results import process_results
 
 
 NAME = 'ModelNet10'
+NUM_EPOCHS = 25
 
+# Load the data
 (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
 x_train, y_train, x_val, y_val = stratified_shuffle(x_train, y_train, test_size=.1)
 x_train, y_train = upsample_classes(x_train, y_train)
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 y_val = to_categorical(y_val)
-if sys.argv[1] == 'test':
+if 'test' in sys.argv:
+    print('RUNNING IN TEST MODE')
     x_train, y_train, x_val, y_val, x_test, y_test = \
         x_train[:512], y_train[:512], x_val[:100], y_val[:100], x_test[:100], y_test[:100]
+    NUM_EPOCHS = 2
 
 n_class = y_test.shape[1]
 input_shape = (30, 30, 30, 1)
@@ -107,7 +111,6 @@ def base_model(model_name='base_model',
     ##### IF USING MULTIPLE GPUS ######
 
     lam_recon = .04
-    NUM_EPOCHS = 1
     INIT_LR = .003
     optimizer = Adam(lr=INIT_LR)
     train_model.compile(optimizer,
