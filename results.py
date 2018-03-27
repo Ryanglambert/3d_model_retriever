@@ -2,8 +2,11 @@ import csv
 import numpy as np
 import os
 
+from itertools import cycle
 from keras.models import Model
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import (confusion_matrix,
+                             precision_recall_curve,
+                             average_precision_score)
 
 from plots import plot_confusion_matrix
 from utils import (class_subset,
@@ -121,7 +124,7 @@ def save_tsne_plot(latent_space, path):
     plt.savefig(os.path.join(path, 'TSNE.png'), bbox_inches='tight')
 
 
-def save_confusion_matrix(y_pred, y_test, target_names, path):
+def save_confusion_matrix(y_test, y_pred, target_names, path):
     import matplotlib.pyplot as plt
     cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1))
     plt.figure()
@@ -129,6 +132,57 @@ def save_confusion_matrix(y_pred, y_test, target_names, path):
     plt.savefig(os.path.join(path, 'Confusion_matrix.png'), bbox_inches='tight')
 
 
+def plot_precision_recall(y_test, y_pred, target_names,
+                          path, save=False, show_figs=False,
+                          figsize=(7, 8)):
+    import matplotlib.pyplot as plt
+    colors = cycle(['navy', 'turquoise', 'darkorange', 'cornflowerblue', 'teal'])
+    precision = dict()
+    recall = dict()
+    average_precision = dict()
+
+    for i in range(y_pred.shape[1]):
+        precision[i], recall[i], _ = precision_recall_curve(y_test[:, i],
+                                                            y_pred[:, i])
+        average_precision[i] = average_precision_score(y_test[:, i],
+                                                       y_pred[:, i])
+
+    # order = sorted(average_precision, key=lambda x: x[1], reverse=True)
+    order = list(zip(*sorted(average_precision.items(),
+                             key=lambda x: x[1],
+                             reverse=True)))[0]
+
+    fig = plt.figure(figsize=figsize)
+    lines = []
+    labels = []
+    fig_count = 0
+    count = 0
+    # for i, color in zip(range(y_test.shape[1]), colors):
+    for idx, i, color in zip(range(1, y_test.shape[1]+1), order, colors):
+        l, =plt.plot(recall[i], precision[i], color=color, lw=2)
+        lines.append(l)
+        labels.append('Precision-recall for class {} (area= {})'\
+                          .format(target_names[i], round(average_precision[i], 2)))
+    #     print(round(average_precision[i], 2))
+        if idx % 5 == 0 and idx != 0:
+    #         fig = plt.gcf()
+            fig.subplots_adjust(bottom=0.25)
+            plt.legend(lines, labels, loc=(0, .18))
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.title('Precision-Recall')
+            lines = []
+            labels = []
+            if save:
+                plt.savefig(os.path.join(path, PRECISION_RECALL_PLOTS, 'precision_recall {}'.format(fig_count)))
+                fig_count += 1
+            if show_figs:
+                plt.show()
+            plt.close()
+            plt.figure(figsize=figsize)
+        count += 1
 
 
 def process_results(name: str, train_model, eval_model,
@@ -163,8 +217,9 @@ def process_results(name: str, train_model, eval_model,
     # save tsne plots
     save_tsne_plot(latent_space, dir_path)
     # save confusion matrix
-    save_confusion_matrix(y_pred, y_test, target_names, dir_path)
+    save_confusion_matrix(y_test, y_pred, target_names, dir_path)
     # save precision recall plots
+    plot_precision_recall(y_test, y_pred, target_names, dir_path, save=True)
     # save filter plots
 
     # _make_tsne_plots(eval_model)
