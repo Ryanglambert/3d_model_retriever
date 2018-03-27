@@ -215,10 +215,10 @@ def process_results(name: str, train_model, eval_model,
 
     # save map plots
     save_map_plot(average_precisions, dir_path)
-    # save tsne plots
-    save_tsne_plot(latent_space, dir_path)
     # save confusion matrix
     save_confusion_matrix(y_test, y_pred, target_names, dir_path)
     # save precision recall plots
     plot_precision_recall(y_test, y_pred, target_names, dir_path, save=True)
+    # save tsne plots
+    save_tsne_plot(latent_space, dir_path)
 
