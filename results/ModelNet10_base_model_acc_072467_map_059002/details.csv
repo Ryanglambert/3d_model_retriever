@@ -1,0 +1,9 @@
+INIT_LR,0.003
+lam_recon,0.04
+NUM_EPOCHS,10
+dim_sub_capsule,8
+dim_primary_capsule,4
+n_channels,4
+primary_cap_kernel_size,7
+first_layer_kernel_size,9
+conv_layer_filters,24

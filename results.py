@@ -9,13 +9,13 @@ from sklearn.metrics import (confusion_matrix,
                              precision_recall_curve,
                              average_precision_score)
 
+from data import load_custom_model
 from plots import plot_confusion_matrix
 from utils import (class_subset,
                    query_latent_space,
                    average_precision)
 
 RESULTS_PATH = 'results/'
-FILTER_PLOTS = 'filter_plots/'
 PRECISION_RECALL_PLOTS = 'precision_recall_plots/'
 MODELS = 'models/'
 
@@ -31,7 +31,6 @@ def initialize_results_dir(model_name, accuracy, mean_average_precision):
     model_dir = "{}_acc_{}_map_{}".format(model_name, accuracy, mean_average_precision)
     base_path = os.path.join(RESULTS_PATH, model_dir)
     _initialize_dir(base_path)
-    _initialize_dir(os.path.join(base_path, FILTER_PLOTS))
     _initialize_dir(os.path.join(base_path,
                                  PRECISION_RECALL_PLOTS))
     _initialize_dir(os.path.join(base_path, MODELS))
@@ -187,7 +186,7 @@ def plot_precision_recall(y_test, y_pred, target_names,
         count += 1
 
 
-def process_results(name: str, train_model, eval_model,
+def process_results(name: str, eval_model,
                     manipulate_model, x_test, y_test, target_names,
                     **details):
     "Takes all outputs you care about and logs them to results folder"
@@ -204,21 +203,32 @@ def process_results(name: str, train_model, eval_model,
     _save_details(dir_path, **details)
 
     # latent space and model
+    print('\n\n\n####### Saving Models ######\n\n\n')
     latent_model.save(os.path.join(dir_path, MODELS, 'latent_model.hdf5'))
     np.save(os.path.join(dir_path, 'latent_space.npy'), latent_space)
     # all the other models hdf5 files
-    # only saving text of train_model since that contains everything we need to know
     _save_model_summary(eval_model, dir_path)
     eval_model.save(os.path.join(dir_path, MODELS, 'eval_model.hdf5'))
     manipulate_model.save(os.path.join(dir_path, MODELS, 'manipulate_model.hdf5'))
+    print('\n\n\n##### running eval model #####\n\n\n')
     y_pred, x_recon = eval_model.predict(x_test)
-
+    print('\n\n\n##### Saving y_pred #####\n\n\n')
+    np.save(os.path.join(dir_path, 'y_pred.npy'), y_pred)
     # save map plots
+    print('\n\n\n##### Saving Mean Average Precision #####\n\n\n')
     save_map_plot(average_precisions, dir_path)
     # save confusion matrix
+    print('\n\n\n##### Saving Mean Confusion Matrix #####\n\n\n')
     save_confusion_matrix(y_test, y_pred, target_names, dir_path)
     # save precision recall plots
+    print('\n\n\n##### Saving Precision Recall #####\n\n\n')
     plot_precision_recall(y_test, y_pred, target_names, dir_path, save=True)
     # save tsne plots
+    print('\n\n\n##### Saving TSNE Recall #####\n\n\n')
     save_tsne_plot(latent_space, dir_path)
+
+
+def reprocess(directory):
+    eval_model = 
+
 

@@ -143,7 +143,7 @@ def base_model(model_name='base_model',
 
 
     ################################ Process the results ###############################
-    process_results(model_name, train_model, eval_model,
+    process_results(model_name, eval_model,
                     manipulate_model, x_test, y_test, target_names,
                     INIT_LR=INIT_LR,
                     lam_recon=lam_recon,
@@ -162,14 +162,14 @@ def main():
         "conv_layer_filters": [24, 48],
         "primary_cap_kernel_size": [9, 7],
         "dim_primary_capsule": [4, 8],
-        "n_channels": [4, 8],
+        "n_channels": [4],
         "dim_sub_capsule": [8, 16],
     }
     param_grid = ParameterGrid(param_grid)
     for params in param_grid:
         try:
             base_model(model_name='base_model',
-                       gpus=8,
+                       gpus=6,
                        **params)
         except:
             print('whoops')
