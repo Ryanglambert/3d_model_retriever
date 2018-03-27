@@ -134,7 +134,7 @@ def base_model(model_name='base_model',
 
     ################################ Process the results ###############################
     process_results(model_name, train_model, eval_model,
-                    manipulate_model, x_test, y_test,
+                    manipulate_model, x_test, y_test, target_names,
                     INIT_LR=INIT_LR,
                     lam_recon=lam_recon,
                     NUM_EPOCHS=NUM_EPOCHS,
