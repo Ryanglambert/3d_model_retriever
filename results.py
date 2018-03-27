@@ -5,6 +5,7 @@ import os
 
 from itertools import cycle
 from keras.models import Model
+from keras.utils import to_categorical
 from sklearn.metrics import (confusion_matrix,
                              precision_recall_curve,
                              average_precision_score)
@@ -123,6 +124,7 @@ def save_tsne_plot(latent_space, path):
     ax.scatter(reduced[:, 0], reduced[:, 1], reduced[:, 2])
     ax.view_init(30, 45)
     plt.savefig(os.path.join(path, 'TSNE.png'), bbox_inches='tight')
+    plt.close()
 
 
 def save_confusion_matrix(y_test, y_pred, target_names, path, figsize=(15, 15)):
@@ -131,6 +133,7 @@ def save_confusion_matrix(y_test, y_pred, target_names, path, figsize=(15, 15)):
     plt.figure(figsize=figsize)
     plot_confusion_matrix(cm, target_names, normalize=True)
     plt.savefig(os.path.join(path, 'Confusion_matrix.png'), bbox_inches='tight')
+    plt.close()
 
 
 def plot_precision_recall(y_test, y_pred, target_names,
@@ -228,7 +231,53 @@ def process_results(name: str, eval_model,
     save_tsne_plot(latent_space, dir_path)
 
 
-def reprocess(directory):
-    eval_model = 
+def reprocess_dir(dpath, x_test, y_test, target_names):
+    # resave y_pred
+    if not os.path.isfile(os.path.join(dpath, 'y_pred.npy')):
+        eval_model_path = os.path.join(dpath, MODELS, 'eval_model.hdf5')
+        eval_model = load_custom_model(eval_model_path)
+        y_pred, x_recon = eval_model.predict(x_test)
+        np.save(os.path.join(dpath, 'y_pred.npy'), y_pred)
+        del eval_model
+    else:
+        y_pred = np.load(os.path.join(dpath, 'y_pred.npy'))
+    # resave map plot
+    print("\n\n\n#### Resave MAP plots####\n\n\n")
+    if not os.path.isfile(os.path.join(dpath, 'mean_average_precision.png')):
+        latent_model = load_custom_model(os.path.join(dpath, MODELS, 'latent_model.hdf5'))
+        latent_space = np.load(os.path.join(dpath, 'latent_space.npy'))
+        average_precisions = _get_average_precisions(latent_model,
+                                                     latent_space,
+                                                     x_test, y_test)
+        save_map_plot(average_precisions, dpath)
+        del latent_model
+    # resave tsne plots
+    print("\n\n\n#### Resave tsne plots####\n\n\n")
+    if not os.path.isfile(os.path.join(dpath, 'TSNE.png')):
+        latent_space = np.load(os.path.join(dpath, 'latent_space.npy'))
+        save_tsne_plot(latent_space, dpath)
 
+    # resave confusion matrix
+    print("\n\n\n#### Resave Confusion Matrix####\n\n\n")
+    if not os.path.isfile(os.path.join(dpath, 'Confusion_matrix.png')):
+        save_confusion_matrix(y_test, y_pred, target_names, dpath)
+    # resave precision recall plots
+    print("\n\n\n#### Resave Precision Recall Plots####\n\n\n")
+    if not len(os.listdir(os.path.join(dpath, PRECISION_RECALL_PLOTS))) > 1:
+        plot_precision_recall(y_test, y_pred, target_names, dpath, save=True)
+
+
+# Dangerous, be judicious
+def reprocess_all_dirs(ignore_pattern='two_convcaps_layers'):
+    from data import load_data
+    root = 'results/'
+    for modelnet in ['ModelNet10', 'ModelNet40']:
+        (_, _), (x_test, y_test), target_names = load_data(modelnet)
+        y_test = to_categorical(y_test)
+        for sub_dir in filter(lambda x: modelnet in x, os.listdir(root)):
+            if ignore_pattern in sub_dir:
+                continue
+            print('\n\n\n### reprocessing ###\n\n\n {}'.format(sub_dir))
+            full_path = os.path.join(root, sub_dir)
+            reprocess_dir(full_path, x_test, y_test, target_names)
 
