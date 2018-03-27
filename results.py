@@ -1,4 +1,5 @@
 import csv
+import multiprocessing
 import numpy as np
 import os
 
@@ -114,7 +115,7 @@ def save_tsne_plot(latent_space, path):
     from matplotlib import cm
     from MulticoreTSNE import MulticoreTSNE as TSNE
 
-    tsne = TSNE(3, n_jobs=4)
+    tsne = TSNE(3, n_jobs=multiprocessing.cpu_count())
     reduced = tsne.fit_transform(latent_space)
     fig = plt.figure(figsize=(5, 5))
     # ax = fig.add_subplot(111, projection='3d')
