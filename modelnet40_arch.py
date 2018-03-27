@@ -36,7 +36,7 @@ from results import process_results
 
 
 NAME= 'ModelNet40'
-NUM_EPOCHS = 25
+NUM_EPOCHS = 10
 
 # Load the data
 (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
@@ -48,7 +48,7 @@ y_val = to_categorical(y_val)
 if 'test' in sys.argv:
     print('RUNNING IN TEST MODE')
     x_train, y_train, x_val, y_val, x_test, y_test = \
-        x_train[:256], y_train[:256], x_val[:100], y_val[:100], x_test[:100], y_test[:100]
+        x_train[0:8192:8], y_train[0:8192:8], x_val[0:2000:20], y_val[0:2000:20], x_test[0:1500:15], y_test[0:1500:15]
     NUM_EPOCHS = 2
 
 n_class = y_test.shape[1]
@@ -223,7 +223,7 @@ def two_convcaps_layers(model_name='two_convcaps_layers',
     ##### IF USING MULTIPLE GPUS ######
 
 
-    INIT_LR = 0.008
+    INIT_LR = 0.005
     lam_recon = .04
     optimizer = Adam(lr=INIT_LR)
     train_model.compile(optimizer,
@@ -242,10 +242,10 @@ def two_convcaps_layers(model_name='two_convcaps_layers',
     reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.5,
                                   patience=3, min_lr=0.0001)
     train_model.fit([x_train, y_train], [y_train, x_train],
-                                    batch_size=32, epochs=NUM_EPOCHS,
+                                    batch_size=512, epochs=NUM_EPOCHS,
                                     validation_data=[[x_val, y_val], [y_val, x_val]],
                     #                 callbacks=[tb, checkpointer])
-                                    callbacks=[tb, csv, reduce_lr, early_stop])
+                                    callbacks=[tb, reduce_lr, early_stop])
 
 
     ################################ Process the results ###############################
@@ -263,6 +263,25 @@ def two_convcaps_layers(model_name='two_convcaps_layers',
 
 
 def main():
+    from sklearn.model_selection import ParameterGrid
+    param_grid = {
+        "first_layer_kernel_size": [9],
+        "conv_layer_filters": [24, 48],
+        "primary_cap_kernel_size": [9, 5],
+        "dim_primary_capsule": [4, 8],
+        "n_channels": [4, 8],
+        "dim_sub_capsule": [8, 16],
+    }
+    param_grid = ParameterGrid(param_grid)
+
+    for params in param_grid:
+        try:
+            base_model(model_name='base_model',
+                       gpus=8,
+                       **params)
+        except:
+            print('whoops')
+
     # base_model(model_name='base_model',
     #            first_layer_kernel_size=9,
     #            conv_layer_filters=48,
@@ -270,19 +289,19 @@ def main():
     #            dim_primary_capsule=5,
     #            n_channels=8,
     #            dim_sub_capsule=16,
-    #            gpus=1)
+    #            gpus=8)
 
-    two_convcaps_layers(model_name='two_convcaps_layers',
-                        conv_layer_filters=48,
-                        first_layer_kernel_size=9,
-                        primary_cap_kernel_size=5,
-                        dim_primary_capsule=5,
-                        n_channels=5,
-                        primary_2_cap_kernel_size=5,
-                        dim_primary_capsule_2=5,
-                        n_channels_2=5,
-                        dim_sub_capsule=16,
-                        gpus=1)
+    # two_convcaps_layers(model_name='two_convcaps_layers',
+    #                     conv_layer_filters=48,
+    #                     first_layer_kernel_size=3,
+    #                     primary_cap_kernel_size=9,
+    #                     dim_primary_capsule=4,
+    #                     n_channels=6,
+    #                     primary_2_cap_kernel_size=5,
+    #                     dim_primary_capsule_2=4,
+    #                     n_channels_2=5,
+    #                     dim_sub_capsule=16,
+    #                     gpus=8)
 
 if __name__ == '__main__':
     main()

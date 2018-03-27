@@ -113,9 +113,10 @@ def save_tsne_plot(latent_space, path):
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from matplotlib import cm
-    from MulticoreTSNE import MulticoreTSNE as TSNE
+    # from MulticoreTSNE import MulticoreTSNE as TSNE
+    from sklearn.manifold.t_sne import TSNE
 
-    tsne = TSNE(3, n_jobs=multiprocessing.cpu_count())
+    tsne = TSNE(3)
     reduced = tsne.fit_transform(latent_space)
     fig = plt.figure(figsize=(5, 5))
     # ax = fig.add_subplot(111, projection='3d')
@@ -206,9 +207,8 @@ def process_results(name: str, train_model, eval_model,
     latent_model.save(os.path.join(dir_path, MODELS, 'latent_model.hdf5'))
     np.save(os.path.join(dir_path, 'latent_space.npy'), latent_space)
     # all the other models hdf5 files
-    train_model.save(os.path.join(dir_path, MODELS, 'train_model.hdf5'))
     # only saving text of train_model since that contains everything we need to know
-    _save_model_summary(train_model, dir_path)
+    _save_model_summary(eval_model, dir_path)
     eval_model.save(os.path.join(dir_path, MODELS, 'eval_model.hdf5'))
     manipulate_model.save(os.path.join(dir_path, MODELS, 'manipulate_model.hdf5'))
     y_pred, x_recon = eval_model.predict(x_test)

@@ -35,7 +35,7 @@ from results import process_results
 
 
 NAME = 'ModelNet10'
-NUM_EPOCHS = 25
+NUM_EPOCHS = 10
 
 # Load the data
 (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
@@ -60,53 +60,60 @@ def base_model(model_name='base_model',
                n_channels=4,
                primary_cap_kernel_size=9,
                first_layer_kernel_size=9,
-               conv_layer_filters=48):
+               conv_layer_filters=48,
+               gpus=1):
     model_name = NAME + '_' + model_name
 
 
     ##### If using multiple GPUS ##########
     # with tf.device("/cpu:0"):
-    x = Input(shape=input_shape)
-    conv1 = Conv3D(filters=conv_layer_filters, kernel_size=first_layer_kernel_size, strides=1,
-                                  padding='valid', activation='relu', name='conv1')(x)
-    primarycaps = PrimaryCap(conv1, dim_capsule=dim_primary_capsule, n_channels=n_channels,
-                                                      kernel_size=primary_cap_kernel_size, strides=2, padding='valid',
-                                                      name='primarycap_conv3d')
-    sub_caps = CapsuleLayer(num_capsule=n_class, dim_capsule=dim_sub_capsule,
-                                                     routings=3, name='sub_caps')(primarycaps)
-    out_caps = Length(name='capsnet')(sub_caps)
+    def make_model():
+        x = Input(shape=input_shape)
+        conv1 = Conv3D(filters=conv_layer_filters, kernel_size=first_layer_kernel_size, strides=1,
+                                      padding='valid', activation='relu', name='conv1')(x)
+        primarycaps = PrimaryCap(conv1, dim_capsule=dim_primary_capsule, n_channels=n_channels,
+                                                          kernel_size=primary_cap_kernel_size, strides=2, padding='valid',
+                                                          name='primarycap_conv3d')
+        sub_caps = CapsuleLayer(num_capsule=n_class, dim_capsule=dim_sub_capsule,
+                                                         routings=3, name='sub_caps')(primarycaps)
+        out_caps = Length(name='capsnet')(sub_caps)
 
-    # Decoder network
-    y = Input(shape=(n_class,))
-    masked_by_y = Mask()([sub_caps, y])
-    masked = Mask()(sub_caps)
+        # Decoder network
+        y = Input(shape=(n_class,))
+        masked_by_y = Mask()([sub_caps, y])
+        masked = Mask()(sub_caps)
 
-    # shared decoder model in training and prediction
-    decoder = Sequential(name='decoder')
-    decoder.add(Dense(512, activation='relu',
-                      input_dim=dim_sub_capsule*n_class))
-    decoder.add(Dense(1024, activation='relu'))
-    decoder.add(Dense(np.prod(input_shape), activation='sigmoid'))
-    decoder.add(Reshape(target_shape=input_shape, name='out_recon'))
-
-
-    ### Models for training and evaluation (prediction and actually using)
-    train_model = Model([x, y], [out_caps, decoder(masked_by_y)])
-    eval_model = Model(x, [out_caps, decoder(masked)])
-
-    ### manipulate model can be used to visualize activation maps for specific classes
-    noise = Input(shape=(n_class, dim_sub_capsule))
-    noised_sub_caps = Add()([sub_caps, noise])
-    masked_noised_y = Mask()([noised_sub_caps, y])
-    manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
+        # shared decoder model in training and prediction
+        decoder = Sequential(name='decoder')
+        decoder.add(Dense(512, activation='relu',
+                          input_dim=dim_sub_capsule*n_class))
+        decoder.add(Dense(1024, activation='relu'))
+        decoder.add(Dense(np.prod(input_shape), activation='sigmoid'))
+        decoder.add(Reshape(target_shape=input_shape, name='out_recon'))
 
 
+        ### Models for training and evaluation (prediction and actually using)
+        train_model = Model([x, y], [out_caps, decoder(masked_by_y)])
+        eval_model = Model(x, [out_caps, decoder(masked)])
 
+        ### manipulate model can be used to visualize activation maps for specific classes
+        noise = Input(shape=(n_class, dim_sub_capsule))
+        noised_sub_caps = Add()([sub_caps, noise])
+        masked_noised_y = Mask()([noised_sub_caps, y])
+        manipulate_model = Model([x, y, noise], decoder(masked_noised_y))
+        return train_model, eval_model, manipulate_model
+
+    if gpus > 1:
+        with tf.device("/cpu:0"):
+            train_model, eval_model, manipulate_model = make_model()
+    else:
+        train_model, eval_model, manipulate_model = make_model()
 
 
     ################################ Compile and Train ###############################
     ##### IF USING MULTIPLE GPUS APPLY JUST BEFORE COMPILING ######
-    # train_model = multi_gpu_model(train_model, gpus=8) #### Adjust for number of gpus
+    if gpus > 1:
+        train_model = multi_gpu_model(train_model, gpus=gpus) #### Adjust for number of gpus
     # train_model = multi_gpu_model(train_model, gpus=2) #### Adjust for number of gpus
     ##### IF USING MULTIPLE GPUS ######
 
@@ -129,7 +136,7 @@ def base_model(model_name='base_model',
     reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.5,
                                   patience=3, min_lr=0.0001)
     train_model.fit([x_train, y_train], [y_train, x_train],
-                                    batch_size=256, epochs=NUM_EPOCHS,
+                                    batch_size=128, epochs=NUM_EPOCHS,
                                     validation_data=[[x_val, y_val], [y_val, x_val]],
                     #                 callbacks=[tb, checkpointer])
                                     callbacks=[tb, csv, reduce_lr, early_stop])
@@ -149,13 +156,23 @@ def base_model(model_name='base_model',
                     conv_layer_filters=conv_layer_filters)
 
 def main():
-    base_model(model_name='base_model',
-               dim_sub_capsule=16,
-               dim_primary_capsule=8,
-               n_channels=4,
-               primary_cap_kernel_size=9,
-               first_layer_kernel_size=9,
-               conv_layer_filters=48)
+    from sklearn.model_selection import ParameterGrid
+    param_grid = {
+        "first_layer_kernel_size": [9],
+        "conv_layer_filters": [24, 48],
+        "primary_cap_kernel_size": [9, 7],
+        "dim_primary_capsule": [4, 8],
+        "n_channels": [4, 8],
+        "dim_sub_capsule": [8, 16],
+    }
+    param_grid = ParameterGrid(param_grid)
+    for params in param_grid:
+        try:
+            base_model(model_name='base_model',
+                       gpus=8,
+                       **params)
+        except:
+            print('whoops')
 
 
 if __name__ == '__main__':
