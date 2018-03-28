@@ -58,10 +58,11 @@ def plot_class_balance(figsize=(4, 3), save=False):
     valid = pd.DataFrame(y_val)
     # inspect that the validation set is representative of the training set
     title = 'Train Labels'
+    plt.figure(figsize=figsize)
     train[0].value_counts().sort_values().plot(kind='bar', title=title)
     if save:
         plt.savefig(title + '.png')
-    plt.figure()
+    plt.figure(figsize=figsize)
     title = 'Validation Labels'
     valid[0].value_counts().sort_values().plot(kind='bar', title=title)
     if save:
