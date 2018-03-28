@@ -1,4 +1,5 @@
 from IPython.display import display, HTML
+import matplotlib
 import os
 
 import matplotlib.pyplot as plt
@@ -32,12 +33,16 @@ def make_file_description_data_frame(path='./ModelNet10/', show_missed=True):
     return pd.DataFrame(paths)
 
 
-def plot_unbalanced_classes(df, title, display_df=False, save=False):
+def plot_unbalanced_classes(df, title, display_df=False, save=False, figsize=(10, 6), fontsize=10):
     grouped = df.groupby(['class', 'type'])['type'].count()
     unstacked = grouped.unstack()
-    plt.figure()
+    plt.figure(figsize=figsize)
     unstacked = unstacked.sort_values(['test', 'train'])
-    unstacked.plot(kind='bar', title=title, figsize=(10, 6), yticks=np.arange(0, unstacked['train'].max(), 100))
+    default_font_size = matplotlib.rcParams['font.size']
+    matplotlib.rcParams.update({'font.size': fontsize})
+    unstacked.plot(kind='bar', figsize=figsize, yticks=np.arange(0, unstacked['train'].max(), 500))
+    matplotlib.rcParams.update({'font.size': default_font_size})
+    plt.title(title)
     plt.ylabel('Number of Samples')
     # plt.grid()
     if save:
