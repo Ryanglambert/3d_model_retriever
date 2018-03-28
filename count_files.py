@@ -32,13 +32,14 @@ def make_file_description_data_frame(path='./ModelNet10/', show_missed=True):
     return pd.DataFrame(paths)
 
 
-def plot_unbalanced_classes(df, title):
+def plot_unbalanced_classes(df, title, display_df=False):
     grouped = df.groupby(['class', 'type'])['type'].count()
     unstacked = grouped.unstack()
     plt.figure()
     unstacked = unstacked.sort_values(['test', 'train'])
-    unstacked.plot(kind='bar', title=title, figsize=(10, 6), yticks=np.arange(0, 900, 100))
+    unstacked.plot(kind='bar', title=title, figsize=(10, 6), yticks=np.arange(0, unstacked['train'].max(), 100))
     plt.ylabel('Number of Samples')
-    plt.grid()
+    # plt.grid()
     plt.show()
-    display(unstacked)
+    if display_df:
+        display(unstacked)
