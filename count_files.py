@@ -43,6 +43,7 @@ def plot_unbalanced_classes(df, title, display_df=False, save=False, figsize=(10
     unstacked.plot(kind='bar', figsize=figsize, yticks=np.arange(0, unstacked['train'].max(), 500))
     matplotlib.rcParams.update({'font.size': default_font_size})
     plt.title(title)
+    plt.legend(loc=2)
     plt.ylabel('Number of Samples')
     # plt.grid()
     if save:
