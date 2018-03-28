@@ -14,6 +14,7 @@ ModelNet40/
 ModelNet40.zip.1
 ModelNet40.zip
 results_bak
+dont_track/*
 binvox
 viewvox
 *.log
