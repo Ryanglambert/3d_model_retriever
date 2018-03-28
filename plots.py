@@ -43,7 +43,7 @@ def plot_confusion_matrix(cm, classes,
     plt.xlabel('Predicted label')
 
 
-def plot_class_balance():
+def plot_class_balance(figsize=(4, 3), save=False):
     "Visually inspect the balancing strategy is working"
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -57,15 +57,24 @@ def plot_class_balance():
     train = pd.DataFrame(y_train)
     valid = pd.DataFrame(y_val)
     # inspect that the validation set is representative of the training set
-    train[0].value_counts().sort_values().plot(kind='bar', title='Train Labels')
+    title = 'Train Labels'
+    train[0].value_counts().sort_values().plot(kind='bar', title=title)
+    if save:
+        plt.savefig(title + '.png')
     plt.figure()
-    valid[0].value_counts().sort_values().plot(kind='bar', title='Validation Labels')
+    title = 'Validation Labels'
+    valid[0].value_counts().sort_values().plot(kind='bar', title=title)
+    if save:
+        plt.savefig(title + '.png')
 
     # inspect that the Training classes are balanced
     x_train, y_train = upsample_classes(x_train, y_train)
     train = pd.DataFrame(y_train)
-    plt.figure()
-    train[0].value_counts().sort_values().plot(kind='bar', title='Training Class Balance After Upsampling')
+    plt.figure(figsize=figsize)
+    title = 'Training Class Balance After Upsampling'
+    train[0].value_counts().sort_values().plot(kind='bar', title=title)
+    if save:
+        plt.savefig(title + '.png')
 
 
 def plot_vox(*mats, title='Title'):
