@@ -35,7 +35,7 @@ from results import process_results
 
 
 NAME = 'ModelNet10'
-NUM_EPOCHS = 10
+NUM_EPOCHS = 2
 
 # Load the data
 (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
@@ -136,7 +136,7 @@ def base_model(model_name='base_model',
     reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.5,
                                   patience=3, min_lr=0.0001)
     train_model.fit([x_train, y_train], [y_train, x_train],
-                                    batch_size=128, epochs=NUM_EPOCHS,
+                                    batch_size=256, epochs=NUM_EPOCHS,
                                     validation_data=[[x_val, y_val], [y_val, x_val]],
                     #                 callbacks=[tb, checkpointer])
                                     callbacks=[tb, csv, reduce_lr, early_stop])
@@ -166,13 +166,16 @@ def main():
         "dim_sub_capsule": [8, 16],
     }
     param_grid = ParameterGrid(param_grid)
-    for params in param_grid:
-        try:
-            base_model(model_name='base_model',
-                       gpus=6,
-                       **params)
-        except:
-            print('whoops')
+    # for params in param_grid:
+    #     try:
+    #         base_model(model_name='base_model',
+    #                    gpus=6,
+    #                    **params)
+    #     except:
+    #         print('whoops')
+    base_model(model_name='out_of_box',
+               gpus=6, conv_layer_filters=256, dim_primary_capsule=8,
+               dim_sub_capsule=8, n_channels=1)
 
 
 if __name__ == '__main__':

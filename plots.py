@@ -10,7 +10,7 @@ import binvox_rw_py as binvox
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
-                          title='Confusion matrix',
+                          suffix='',
                           cmap=plt.cm.Blues):
     """
     This function prints and plots the confusion matrix.
@@ -25,7 +25,7 @@ def plot_confusion_matrix(cm, classes,
     print(cm)
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
+    plt.title('Confusion Matrix{}'.format(suffix))
     plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
