@@ -1,0 +1,13 @@
+accuracy,087225
+mean_avg_prec,080079
+rot_accuracy,031938
+rot_mean_avg_prec,03286
+INIT_LR,0.003
+lam_recon,0.04
+NUM_EPOCHS,10
+dim_sub_capsule,16
+dim_primary_capsule,8
+n_channels,3
+primary_cap_kernel_size,9
+first_layer_kernel_size,9
+conv_layer_filters,128

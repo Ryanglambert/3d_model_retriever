@@ -211,7 +211,7 @@ def process_results(name: str, eval_model,
     _save_model_summary(eval_model, dir_path)
     eval_model.save(os.path.join(dir_path, MODELS, 'eval_model.hdf5'))
     manipulate_model.save(os.path.join(dir_path, MODELS, 'manipulate_model.hdf5'))
-    def save_everything(x_test, suffix=''):
+    def save_everything(x_test, average_precisions, suffix=''):
         print('\n\n\n##### running eval model #####\n\n\n')
         y_pred, x_recon = eval_model.predict(x_test)
         print('\n\n\n##### Saving y_pred #####\n\n\n')
@@ -226,8 +226,8 @@ def process_results(name: str, eval_model,
         # save precision recall plots
         print('\n\n\n##### Saving Precision Recall #####\n\n\n')
         plot_precision_recall(y_test, y_pred, target_names, dir_path, save=True, suffix=suffix)
-    save_everything(x_test)
-    save_everything(rotated_about_z, 'rotated')
+    save_everything(x_test, average_precisions)
+    save_everything(rotated_about_z, rot_average_precisions, 'rotated')
     # not worth the time
     # # save tsne plots
     # print('\n\n\n##### Saving TSNE Recall #####\n\n\n')

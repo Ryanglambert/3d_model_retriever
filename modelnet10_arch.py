@@ -35,7 +35,7 @@ from results import process_results
 
 
 NAME = 'ModelNet10'
-NUM_EPOCHS = 2
+NUM_EPOCHS = 10
 
 # Load the data
 (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
@@ -157,15 +157,16 @@ def base_model(model_name='base_model',
 
 def main():
     from sklearn.model_selection import ParameterGrid
-    param_grid = {
-        "first_layer_kernel_size": [9],
-        "conv_layer_filters": [24, 48],
-        "primary_cap_kernel_size": [9, 7],
-        "dim_primary_capsule": [4, 8],
-        "n_channels": [4],
-        "dim_sub_capsule": [8, 16],
-    }
-    param_grid = ParameterGrid(param_grid)
+    # initial shot
+    # param_grid = {
+    #     "first_layer_kernel_size": [9],
+    #     "conv_layer_filters": [24, 48],
+    #     "primary_cap_kernel_size": [9, 7],
+    #     "dim_primary_capsule": [4, 8],
+    #     "n_channels": [4],
+    #     "dim_sub_capsule": [8, 16],
+    # }
+    # param_grid = ParameterGrid(param_grid)
     # for params in param_grid:
     #     try:
     #         base_model(model_name='base_model',
@@ -173,9 +174,26 @@ def main():
     #                    **params)
     #     except:
     #         print('whoops')
+    # hey maybe 1 channel? Never thought to try it til now
     base_model(model_name='out_of_box',
                gpus=6, conv_layer_filters=256, dim_primary_capsule=8,
                dim_sub_capsule=8, n_channels=1)
+    param_grid = {
+        "first_layer_kernel_size": [9],
+        "conv_layer_filters": [128],
+        "primary_cap_kernel_size": [9],
+        "dim_primary_capsule": [4, 8],
+        "n_channels": [2, 3],
+        "dim_sub_capsule": [16],
+    }
+    param_grid = ParameterGrid(param_grid)
+    for params in param_grid:
+        try:
+            base_model(model_name='base_model',
+                       gpus=8,
+                       **params)
+        except:
+            print('whoops')
 
 
 if __name__ == '__main__':
