@@ -36,7 +36,7 @@ from results import process_results
 
 
 NAME= 'ModelNet40'
-NUM_EPOCHS = 10
+NUM_EPOCHS = 50
 
 # Load the data
 (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
@@ -134,15 +134,21 @@ def base_model(model_name='base_model',
                                mode='auto')
     reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.5,
                                   patience=3, min_lr=0.0001)
+    #warm up with random restart by hand (I know it's jenky but it worked :-P)
     train_model.fit([x_train, y_train], [y_train, x_train],
-                                    batch_size=32, epochs=NUM_EPOCHS,
+                                    batch_size=32, epochs=3,
+                                    validation_data=[[x_val, y_val], [y_val, x_val]])
+                    #                 callbacks=[tb, checkpointer])
+                                    # callbacks=[tb, csv, reduce_lr, early_stop])
+    train_model.fit([x_train, y_train], [y_train, x_train],
+                                    batch_size=128, epochs=NUM_EPOCHS,
                                     validation_data=[[x_val, y_val], [y_val, x_val]],
                     #                 callbacks=[tb, checkpointer])
                                     callbacks=[tb, csv, reduce_lr, early_stop])
 
 
     ################################ Process the results ###############################
-    process_results(model_name, train_model, eval_model,
+    process_results(model_name, eval_model,
                     manipulate_model, x_test, y_test, target_names,
                     INIT_LR=INIT_LR,
                     lam_recon=lam_recon,
@@ -309,7 +315,7 @@ def main():
                dim_primary_capsule=8,
                n_channels=1,
                dim_sub_capsule=8,
-               gpus=1)
+               gpus=8)
 
 if __name__ == '__main__':
     main()
