@@ -263,24 +263,24 @@ def two_convcaps_layers(model_name='two_convcaps_layers',
 
 
 def main():
-    from sklearn.model_selection import ParameterGrid
-    param_grid = {
-        "first_layer_kernel_size": [9],
-        "conv_layer_filters": [24, 48],
-        "primary_cap_kernel_size": [9, 5],
-        "dim_primary_capsule": [4, 8],
-        "n_channels": [4, 8],
-        "dim_sub_capsule": [8, 16],
-    }
-    param_grid = ParameterGrid(param_grid)
+    # from sklearn.model_selection import ParameterGrid
+    # param_grid = {
+    #     "first_layer_kernel_size": [9],
+    #     "conv_layer_filters": [24, 48],
+    #     "primary_cap_kernel_size": [9, 5],
+    #     "dim_primary_capsule": [4, 8],
+    #     "n_channels": [4, 8],
+    #     "dim_sub_capsule": [8, 16],
+    # }
+    # param_grid = ParameterGrid(param_grid)
 
-    for params in param_grid:
-        try:
-            base_model(model_name='base_model',
-                       gpus=8,
-                       **params)
-        except:
-            print('whoops')
+    # for params in param_grid:
+    #     try:
+    #         base_model(model_name='base_model',
+    #                    gpus=8,
+    #                    **params)
+    #     except:
+    #         print('whoops')
 
     # base_model(model_name='base_model',
     #            first_layer_kernel_size=9,
@@ -302,6 +302,14 @@ def main():
     #                     n_channels_2=5,
     #                     dim_sub_capsule=16,
     #                     gpus=8)
+    base_model(model_name='base_model',
+               first_layer_kernel_size=9,
+               conv_layer_filters=256,
+               primary_cap_kernel_size=9,
+               dim_primary_capsule=8,
+               n_channels=1,
+               dim_sub_capsule=8,
+               gpus=1)
 
 if __name__ == '__main__':
     main()
