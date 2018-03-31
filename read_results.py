@@ -17,6 +17,7 @@ def get_map(path):
 
 
 def load_details_df(model_folder_path):
+    "Loads details about model from a given results path"
     df = pd.read_csv(os.path.join(
         model_folder_path, 'details.csv'), header=None).T
     # make header
@@ -43,6 +44,7 @@ def convert_num_to_percent(num):
 
 
 def load_results(model='ModelNet10'):
+    "Loads results about model performance from given `results/modelXXXX` path"
     mnet_path = list_results_dir(model)
     dfs = [load_details_df(mdir) for mdir in mnet_path]
     df = pd.concat(dfs, ignore_index=True)

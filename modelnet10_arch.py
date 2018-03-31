@@ -175,26 +175,29 @@ def main():
     #     except:
     #         print('whoops')
     # hey maybe 1 channel? Never thought to try it til now
-    base_model(model_name='out_of_box',
-               gpus=6, conv_layer_filters=256, dim_primary_capsule=8,
-               dim_sub_capsule=8, n_channels=1)
-    param_grid = {
-        "first_layer_kernel_size": [9],
-        "conv_layer_filters": [128],
-        "primary_cap_kernel_size": [9],
-        "dim_primary_capsule": [4, 8],
-        "n_channels": [2, 3],
-        "dim_sub_capsule": [16],
-    }
-    param_grid = ParameterGrid(param_grid)
-    for params in param_grid:
-        try:
-            base_model(model_name='base_model',
-                       gpus=8,
-                       **params)
-        except:
-            print('whoops')
+    # base_model(model_name='out_of_box',
+    #            gpus=6, conv_layer_filters=256, dim_primary_capsule=8,
+    #            dim_sub_capsule=8, n_channels=1)
+    # param_grid = {
+    #     "first_layer_kernel_size": [9],
+    #     "conv_layer_filters": [128],
+    #     "primary_cap_kernel_size": [9],
+    #     "dim_primary_capsule": [4, 8],
+    #     "n_channels": [2, 3],
+    #     "dim_sub_capsule": [16],
+    # }
+    # param_grid = ParameterGrid(param_grid)
+    # for params in param_grid:
+    #     try:
+    #         base_model(model_name='base_model',
+    #                    gpus=8,
+    #                    **params)
+    #     except:
+    #         print('whoops')
 
+    base_model(model_name='out_of_box_same_settings',
+               gpus=8, conv_layer_filters=256, dim_primary_capsule=8,
+               dim_sub_capsule=16, n_channels=32)
 
 if __name__ == '__main__':
     main()
