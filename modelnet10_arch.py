@@ -31,38 +31,27 @@ from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
 from data import load_data
 from utils import upsample_classes, stratified_shuffle
-from results import process_results
+from results import process_results, _accuracy
 
 
-NAME = 'ModelNet10'
-NUM_EPOCHS = 10
-
-# Load the data
-(x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
-x_train, y_train, x_val, y_val = stratified_shuffle(x_train, y_train, test_size=.1)
-x_train, y_train = upsample_classes(x_train, y_train)
-y_train = to_categorical(y_train)
-y_test = to_categorical(y_test)
-y_val = to_categorical(y_val)
-if 'test' in sys.argv:
-    print('RUNNING IN TEST MODE')
-    x_train, y_train, x_val, y_val, x_test, y_test = \
-        x_train[:512], y_train[:512], x_val[:100], y_val[:100], x_test[:100], y_test[:100]
-    NUM_EPOCHS = 2
-
-n_class = y_test.shape[1]
-input_shape = (30, 30, 30, 1)
+NAME = 'ModelNet40'
+NUM_EPOCHS = 12
 
 
-def base_model(model_name='base_model',
+
+
+def base_model(x_train, y_train, x_test, y_test, target_names,
+               model_name='base_model',
                dim_sub_capsule=16,
                dim_primary_capsule=8,
                n_channels=4,
                primary_cap_kernel_size=9,
                first_layer_kernel_size=9,
                conv_layer_filters=48,
-               gpus=1):
+               gpus=1, cv=False):
     model_name = NAME + '_' + model_name
+    n_class = y_test.shape[1]
+    input_shape = (30, 30, 30, 1)
 
 
     ##### If using multiple GPUS ##########
@@ -135,11 +124,37 @@ def base_model(model_name='base_model',
                                mode='auto')
     reduce_lr = ReduceLROnPlateau(monitor='val_capsnet_acc', factor=0.5,
                                   patience=3, min_lr=0.0001)
-    train_model.fit([x_train, y_train], [y_train, x_train],
-                                    batch_size=256, epochs=NUM_EPOCHS,
-                                    validation_data=[[x_val, y_val], [y_val, x_val]],
-                    #                 callbacks=[tb, checkpointer])
-                                    callbacks=[tb, csv, reduce_lr, early_stop])
+    def reset_weights(model):
+        session = K.get_session()
+        for layer in model.layers:
+            if hasattr(layer, 'kernel_initializer'):
+                layer.kernel.initializer.run(session=session)
+    if cv:
+        if 'ModelNet40' in NAME:
+            for i in range(10):
+                train_model.fit([x_train[:500], y_train[:500]], [y_train[:500], x_train[:500]],
+                                                batch_size=32, epochs=1)
+                # this is only to get the network warmed up.
+                restart_acc = _accuracy(eval_model, x_train[:200], y_train[:200])
+                if not restart_acc > .1:
+                    print("\n\n\n ### Doing random restart! ### \n\n\n")
+                    reset_weights(train_model)
+                    continue
+                else:
+                    print("\n\n\n ### not in local minimum! ### \n\n\n")
+                    break
+            if not restart_acc > .1:
+                print("\n\n\n ### Couldn't get out of local minimum ### \n\n\n")
+        train_model.fit([x_train, y_train], [y_train, x_train],
+                        batch_size=256, epochs=NUM_EPOCHS)
+        # y_pred, x_recon = eval_model.predict(x_test, y_test)
+        # return y_pred, x_recon
+    else:
+        train_model.fit([x_train, y_train], [y_train, x_train],
+                                        batch_size=256, epochs=NUM_EPOCHS,
+                                        validation_data=[[x_val, y_val], [y_val, x_val]],
+                        #                 callbacks=[tb, checkpointer])
+                                        callbacks=[tb, csv, reduce_lr, early_stop])
 
 
     ################################ Process the results ###############################
@@ -156,6 +171,19 @@ def base_model(model_name='base_model',
                     conv_layer_filters=conv_layer_filters)
 
 def main():
+    # # Load the data
+    # (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
+    # x_train, y_train, x_val, y_val = stratified_shuffle(x_train, y_train, test_size=.1)
+    # x_train, y_train = upsample_classes(x_train, y_train)
+    # y_train = to_categorical(y_train)
+    # y_test = to_categorical(y_test)
+    # y_val = to_categorical(y_val)
+    # if 'test' in sys.argv:
+    #     print('RUNNING IN TEST MODE')
+    #     x_train, y_train, x_val, y_val, x_test, y_test = \
+    #         x_train[:512], y_train[:512], x_val[:100], y_val[:100], x_test[:100], y_test[:100]
+
+    # NUM_EPOCHS = 2
     from sklearn.model_selection import ParameterGrid
     # initial shot
     # param_grid = {
@@ -169,13 +197,15 @@ def main():
     # param_grid = ParameterGrid(param_grid)
     # for params in param_grid:
     #     try:
-    #         base_model(model_name='base_model',
-    #                    gpus=6,
-    #                    **params)
+            # base_model(x_train, y_train, x_test, y_test,
+            #            'base_model',
+            #            gpus=6,
+            #            **params)
     #     except:
     #         print('whoops')
     # hey maybe 1 channel? Never thought to try it til now
-    # base_model(model_name='out_of_box',
+    # base_model(x_train, y_train, x_test, y_test,
+    #            'out_of_box',
     #            gpus=6, conv_layer_filters=256, dim_primary_capsule=8,
     #            dim_sub_capsule=8, n_channels=1)
     # param_grid = {
@@ -189,15 +219,39 @@ def main():
     # param_grid = ParameterGrid(param_grid)
     # for params in param_grid:
     #     try:
-    #         base_model(model_name='base_model',
-    #                    gpus=8,
-    #                    **params)
+            # base_model(x_train, y_train, x_test, y_test,
+            #            'base_model',
+            #            gpus=8,
+            #            **params)
     #     except:
     #         print('whoops')
 
-    base_model(model_name='out_of_box_same_settings',
-               gpus=8, conv_layer_filters=256, dim_primary_capsule=8,
-               dim_sub_capsule=16, n_channels=32)
+    # base_model(x_train, y_train, x_test, y_test,
+    #            'out_of_box_same_settings',
+    #            gpus=8, conv_layer_filters=256, dim_primary_capsule=8,
+    #            dim_sub_capsule=16, n_channels=32)
+
+    # this needs to get cleaned up, but I don't have the time right now sorry
+    from sklearn.model_selection import StratifiedKFold
+    from results import _accuracy
+    #### Cross validated
+    #### was also used against modelnet40
+    (x_train, y_train), (x_test, y_test), target_names = load_data(NAME)
+    x = np.concatenate((x_train, x_test))
+    y = np.concatenate((y_train, y_test))
+    kfold = StratifiedKFold(n_splits=5, shuffle=True)
+    # cvscores = []
+    for train, test in kfold.split(x, y):
+        x_train, y_train = x[train], y[train]
+        x_train, y_train = upsample_classes(x_train, y_train)
+        x_test, y_test = x[test], y[test]
+        y_train = to_categorical(y_train)
+        y_test = to_categorical(y_test)
+        base_model(x_train, y_train, x_test, y_test, target_names,
+                   model_name='best_cv',
+                   gpus=8, conv_layer_filters=256, dim_primary_capsule=8,
+                   dim_sub_capsule=8, n_channels=1,
+                   cv=True)
 
 if __name__ == '__main__':
     main()
