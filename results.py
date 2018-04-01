@@ -185,7 +185,8 @@ def process_results(name: str, eval_model,
     latent_model = _make_latent_model(eval_model)
     latent_space = _make_latent_space(latent_model, x_test)
     rotated_about_z = np.rot90(x_test, axes=(1, 2))
-    def acc_map_metrics(x_test):
+    latent_space_rotated = _make_latent_space(latent_model, rotated_about_z)
+    def acc_map_metrics(x_test, latent_space):
         accuracy = str(round(_accuracy(eval_model,
                                        x_test,
                                        y_test), 5)).replace('.', '')
@@ -194,8 +195,10 @@ def process_results(name: str, eval_model,
                                                      x_test, y_test)
         mean_avg_prec = str(round(np.mean(average_precisions),5)).replace('.', '')
         return accuracy, mean_avg_prec, average_precisions
-    accuracy, mean_avg_prec, average_precisions = acc_map_metrics(x_test)
-    rot_accuracy, rot_mean_avg_prec, rot_average_precisions = acc_map_metrics(rotated_about_z)
+    accuracy, mean_avg_prec, average_precisions = acc_map_metrics(x_test,
+                                                                  latent_space)
+    rot_accuracy, rot_mean_avg_prec, rot_average_precisions = acc_map_metrics(rotated_about_z,
+                                                                              latent_space_rotated)
 
     dir_path = initialize_results_dir(name, accuracy, mean_avg_prec)
     _save_details(dir_path, accuracy=accuracy,
