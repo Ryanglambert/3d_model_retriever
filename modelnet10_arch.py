@@ -35,7 +35,7 @@ from results import process_results, _accuracy
 
 
 NAME = 'ModelNet40'
-NUM_EPOCHS = 12
+NUM_EPOCHS = 10
 
 
 
@@ -135,8 +135,8 @@ def base_model(x_train, y_train, x_test, y_test, target_names,
                 train_model.fit([x_train[:500], y_train[:500]], [y_train[:500], x_train[:500]],
                                                 batch_size=32, epochs=1)
                 # this is only to get the network warmed up.
-                restart_acc = _accuracy(eval_model, x_train[:200], y_train[:200])
-                if not restart_acc > .1:
+                restart_acc = _accuracy(eval_model, x_train[:500], y_train[:500])
+                if not restart_acc > .4:
                     print("\n\n\n ### Doing random restart! ### \n\n\n")
                     reset_weights(train_model)
                     continue

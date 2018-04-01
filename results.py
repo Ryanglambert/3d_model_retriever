@@ -54,7 +54,8 @@ def _get_average_precisions(latent_model, latent_space, x_test, y_test):
         num = i
         num_retrievable = (np.argmax(y_test[num]) == \
                                np.argmax(y_test, axis=1)).sum()
-        latent_object = latent_model.predict(x_test[num:num+1])
+        # latent_object = latent_model.predict(x_test[num:num+1])
+        latent_object = latent_space[num: num+1]
         sims, latent_indices = query_latent_space(latent_object,
                                                   latent_space,
                                                   x_test.shape[0])
