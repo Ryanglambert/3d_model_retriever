@@ -1,3 +1,6 @@
+# Capsule Nets for Content Based 3D Model Retrieval
+![alt text](planes.png)
+
 ## Paper
 [Content-Based 3D Model Retrieval](Content%20Based%203d%20Model%20Retrieval.pdf)
 
