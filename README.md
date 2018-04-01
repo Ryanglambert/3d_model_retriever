@@ -1,5 +1,10 @@
 # Capsule Nets for Content Based 3D Model Retrieval
-![alt text](planes.png)
+First (as far as I know) investigation of the use of Capsule Networks for content-based 3d model retrieval. (information retrieval for 3D models)
+
+
+|   |    |
+|:----------------:|:-----------------:|
+| ![](plane1.png) | ![alt text](planes.png) |
 
 ## Paper
 [Content-Based 3D Model Retrieval](Content%20Based%203d%20Model%20Retrieval.pdf)
