@@ -1,6 +1,11 @@
 ,accuracy,mean_avg_prec,rot_accuracy,rot_mean_avg_prec,primary_cap_kernel_size,n_channels,lam_recon,first_layer_kernel_size,dim_sub_capsule,dim_primary_capsule,conv_layer_filters,NUM_EPOCHS,INIT_LR,model_path
-7,0.80511,0.64885,0.39384,0.32519,9.0,1.0,0.04,9.0,8.0,8.0,256.0,50.0,0.008,results/ModelNet40_base_model_acc_080511_map_064885
-6,0.76297,0.5917,,,9.0,4.0,0.04,9.0,16.0,4.0,24.0,10.0,0.008,results/ModelNet40_base_model_acc_076297_map_05917
+10,0.84043,0.71472,0.42512,0.31389,9.0,1.0,0.04,9.0,8.0,8.0,256.0,10.0,0.003,results/ModelNet40_best_cv_acc_084043_map_071472
+11,0.82975,0.70212,0.41021,0.30473,9.0,1.0,0.04,9.0,8.0,8.0,256.0,10.0,0.003,results/ModelNet40_best_cv_acc_082975_map_070212
+8,0.82852,0.70405,0.43803,0.31818,9.0,1.0,0.04,9.0,8.0,8.0,256.0,10.0,0.003,results/ModelNet40_best_cv_acc_082852_map_070405
+12,0.827,0.70031,0.3941,0.29524,9.0,1.0,0.04,9.0,8.0,8.0,256.0,10.0,0.003,results/ModelNet40_best_cv_acc_0827_map_070031
+6,0.81092,0.68386,0.38712,0.29252,9.0,1.0,0.04,9.0,8.0,8.0,256.0,10.0,0.003,results/ModelNet40_best_cv_acc_081092_map_068386
+9,0.80511,0.64885,0.39384,0.32519,9.0,1.0,0.04,9.0,8.0,8.0,256.0,50.0,0.008,results/ModelNet40_base_model_acc_080511_map_064885
+7,0.76297,0.5917,,,9.0,4.0,0.04,9.0,16.0,4.0,24.0,10.0,0.008,results/ModelNet40_base_model_acc_076297_map_05917
 4,0.75486,0.58689,,,9.0,8.0,0.04,9.0,16.0,4.0,24.0,10.0,0.008,results/ModelNet40_base_model_acc_075486_map_058689
 1,0.73744,0.55776,,,9.0,4.0,0.04,9.0,8.0,4.0,24.0,10.0,0.008,results/ModelNet40_base_model_acc_073744_map_055776
 0,0.73622,0.54835,,,9.0,8.0,0.04,9.0,8.0,4.0,24.0,10.0,0.008,results/ModelNet40_base_model_acc_073622_map_054835
