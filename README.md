@@ -1,6 +1,17 @@
 ## Paper
 [Content-Based 3D Model Retrieval](Content%20Based%203d%20Model%20Retrieval.pdf)
 
+## Results
+|   | ModelNet10 |   | ModelNet40 |   |
+| -------- | ---------- | -------- | ---------- | -------- |
+|     | Score | 2xStderr | score      | 2xStderr |
+| Accuracy | 93.08% | 1.18% | 82.73% | 2.12% |
+| Mean Average Precision | 88.44% | 4.15% | 70.10% | 2.22% |
+
+
+#### *Cleaning up as we speak
+this code has gotten pretty messy in the last week and I'm in the middle of cleaning it up. Please bare with me. 
+
 ## Setup
 
 **Download the data**
@@ -89,10 +100,3 @@ mesh surface, and 0 indicates the voxel is outside the mesh
 from data import load_data
 (x_train, y_train), (x_test, y_test), target_names = load_data('./ModelNet10')
 ```
-
-
-## Build The Models...
-
-Performance on ModelNet40: 82.29% accuracy against Test set
-
-Performance on ModelNet10: 88.5% accuracy against Test set
