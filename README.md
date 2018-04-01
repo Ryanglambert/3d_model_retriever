@@ -1,3 +1,6 @@
+## Paper
+[Content-Based 3D Model Retrieval](Content%20Based%203d%20Model%20Retrieval.pdf)
+
 ## Setup
 
 **Download the data**
