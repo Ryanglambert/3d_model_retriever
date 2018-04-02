@@ -18,6 +18,9 @@ This project was accomplished in just under 4 weeks. I probably used 120 hours o
 | Accuracy | 93.08% | 1.18% | 82.73% | 2.12% |
 | Mean Average Precision | 88.44% | 4.15% | 70.10% | 2.22% |
 
+## TODO:
+- clean up code
+- make replicable
 
 #### *Cleaning up as we speak
 this code has gotten pretty messy in the last week and I'm in the middle of cleaning it up. Please bare with me. 
