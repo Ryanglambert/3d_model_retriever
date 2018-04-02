@@ -1,6 +1,8 @@
 # Capsule Nets for Content Based 3D Model Retrieval
 First (as far as I know) investigation of the use of Capsule Networks for content-based 3d model retrieval. (information retrieval for 3D models)
 
+This project was accomplished in just under 4 weeks. I probably used 120 hours of total compute time split between single GPU and 8 GPU aws instances (ModelNet40 takes FOREVER to train!). The final reported accuracies are Stratified 5-Fold cross validated.
+
 
 |   |    |
 |:----------------:|:-----------------:|
